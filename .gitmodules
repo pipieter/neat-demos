@@ -1,0 +1,6 @@
+[submodule "submodules/raylib"]
+	path = submodules/raylib
+	url = https://github.com/raysan5/raylib
+[submodule "submodules/neat-headers"]
+	path = submodules/neat-headers
+	url = https://github.com/pipieter/neat-headers

@@ -1,0 +1,32 @@
+#include "engine.hpp"
+
+#include "components.hpp"
+#include "neat/ecs.hpp"
+#include "raylib.h"
+#include "systems.hpp"
+
+engine_s::engine_s() {
+    InitWindow(1280, 720, "Ricochet");
+    SetTargetFPS(60);
+
+    auto entity = ecs.entities.create();
+    ecs.components.add<transform_s>(entity, 100.0f, 100.0f);
+    ecs.components.add<player_s>(entity);
+}
+
+engine_s::~engine_s() {
+    CloseWindow();
+}
+
+void engine_s::run() {
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        ecs.systems.execute(move_system);
+        ecs.systems.execute(draw_system);
+        ecs.systems.execute(player_input_system);
+
+        EndDrawing();
+    }
+}
