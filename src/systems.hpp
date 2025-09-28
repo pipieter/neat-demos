@@ -2,6 +2,6 @@
 
 #include "components.hpp"
 
-void draw_system(transform_s* transform);
-void move_system(ecs_st& ecs);
-void player_input_system(ecs_st& ecs, entity_id entity, player_s* player);
+void draw_system(body_s* body);
+void move_system(ecs_s& ecs);
+void player_input_system(body_s* body);

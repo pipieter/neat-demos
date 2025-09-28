@@ -1,6 +1,8 @@
 #include "engine.hpp"
 
+#include "box2d/collision.h"
 #include "components.hpp"
+#include "entities.hpp"
 #include "neat/ecs.hpp"
 #include "raylib.h"
 #include "systems.hpp"
@@ -9,9 +11,8 @@ engine_s::engine_s() {
     InitWindow(1280, 720, "Ricochet");
     SetTargetFPS(60);
 
-    auto entity = ecs.entities.create();
-    ecs.components.add<transform_s>(entity, 100.0f, 100.0f);
-    ecs.components.add<player_s>(entity);
+    create_world(&ecs);
+    create_player(&ecs, 1.0f, 1.0f);
 }
 
 engine_s::~engine_s() {

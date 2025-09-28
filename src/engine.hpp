@@ -4,7 +4,7 @@
 
 class engine_s {
    private:
-    ecs_st ecs;
+    ecs_s ecs;
 
    public:
     engine_s();

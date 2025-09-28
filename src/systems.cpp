@@ -1,24 +1,27 @@
 #include "systems.hpp"
 
+#include <raylib.h>
+
 #include <cmath>
+#include <iostream>
 
+#include "box2d/box2d.h"
 #include "components.hpp"
-#include "raylib.h"
 
-void draw_system(transform_s* transform) {
-    DrawRectangle((int)transform->x, (int)transform->y, 20, 20, RED);
+void draw_system(body_s* body) {
+    auto position = b2Body_GetPosition(body->b2_id);
+    float x = position.x * 300.0f;
+    float y = position.y * 300.0f;
+    DrawRectangle((int)x, (int)y, 20.0f, 20.0f, RED);
 }
 
-void move_system(ecs_st& ecs) {
-    for (auto [entity, transform, move] : ecs.iterate<transform_s, move_s>()) {
-        transform->x += move->dx;
-        transform->y += move->dy;
-        ecs.components.remove<move_s>(entity);
-    }
+void move_system(ecs_s& ecs) {
+    auto [_, world] = ecs.components.first<world_s>();
+    b2World_Step(world->b2_world, GetFrameTime(), 4);
 }
 
-void player_input_system(ecs_st& ecs, entity_id entity, player_s*) {
-    const float velocity = 300.0f;
+void player_input_system(body_s* body) {
+    const float velocity = 1.0f;
     float       dx       = 0;
     float       dy       = 0;
 
@@ -31,7 +34,5 @@ void player_input_system(ecs_st& ecs, entity_id entity, player_s*) {
     if (IsKeyDown(KEY_D))
         dx += velocity;
 
-    dx = dx * GetFrameTime();
-    dy = dy * GetFrameTime();
-    ecs.components.add<move_s>(entity, dx, dy);
+    b2Body_SetLinearVelocity(body->b2_id, {dx, dy});
 }

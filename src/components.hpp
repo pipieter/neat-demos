@@ -2,44 +2,39 @@
 
 #include <neat/ecs.hpp>
 
+#include "box2d/collision.h"
+#include "box2d/types.h"
+
 struct world_s;
-struct transform_s;
-struct hitbox_s;
+struct body_s;
 struct move_s;
 struct player_s;
+struct blocking_s;
 
 using entity_id = neat::ecs::entity_id;
-using ecs_st    = neat::ecs::engine<
+using ecs_s     = neat::ecs::engine<
     world_s,
-    transform_s,
-    hitbox_s,
+    body_s,
     move_s,
-    player_s>;
+    player_s,
+    blocking_s>;
 
 struct world_s {
-    ecs_st* ecs;
+    ecs_s*    ecs;
+    b2WorldId b2_world;
     struct {
         float w, h;
     } level;
 };
 
-struct transform_s {
-    float x, y;
-};
-
-enum class hitbox_type {
+enum class body_type {
     rectangle = 0,
     circle    = 1
 };
 
-struct hitbox_s {
-    hitbox_type type;
-    union {
-        float radius;
-        struct {
-            float w, h;
-        };
-    };
+struct body_s {
+    body_type type;
+    b2BodyId  b2_id;
 };
 
 struct move_s {
@@ -47,3 +42,5 @@ struct move_s {
 };
 
 struct player_s {};
+
+struct blocking_s {};
