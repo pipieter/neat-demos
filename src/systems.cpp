@@ -5,23 +5,23 @@
 #include <cmath>
 #include <iostream>
 
-#include "box2d/box2d.h"
 #include "components.hpp"
 
 void draw_system(body_s* body) {
-    auto position = b2Body_GetPosition(body->b2_id);
-    float x = position.x * 300.0f;
-    float y = position.y * 300.0f;
-    DrawRectangle((int)x, (int)y, 20.0f, 20.0f, RED);
+    if (body->type == body_type::rectangle) {
+        DrawRectangle(body->x, body->y, body->w, body->h, RED);
+    } else if (body->type == body_type::circle) {
+        DrawCircle(body->x, body->y, body->r, GREEN);
+    }
 }
 
-void move_system(ecs_s& ecs) {
-    auto [_, world] = ecs.components.first<world_s>();
-    b2World_Step(world->b2_world, GetFrameTime(), 4);
+void move_system(body_s* body, velocity_s* velocity) {
+    body->x += velocity->dx * GetFrameTime();
+    body->y += velocity->dy * GetFrameTime();
 }
 
-void player_input_system(body_s* body) {
-    const float velocity = 1.0f;
+void player_input_system(ecs_s& ecs, entity_id entity, player_s*) {
+    const float velocity = 400.0f;
     float       dx       = 0;
     float       dy       = 0;
 
@@ -34,5 +34,5 @@ void player_input_system(body_s* body) {
     if (IsKeyDown(KEY_D))
         dx += velocity;
 
-    b2Body_SetLinearVelocity(body->b2_id, {dx, dy});
+    ecs.components.add<velocity_s>(entity, dx, dy);
 }
