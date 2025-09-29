@@ -5,11 +5,12 @@
 #include <cmath>
 #include <iostream>
 
+#include "common.hpp"
 #include "components.hpp"
 #include "entities.hpp"
 
 void draw_system(body_s* body) {
-    const float scale    = 20.0f;
+    const float scale    = render_scale;
     auto        position = body->center();
 
     int                    shape_count = b2Body_GetShapeCount(body->b2_id);
