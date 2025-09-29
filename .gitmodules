@@ -4,3 +4,6 @@
 [submodule "submodules/neat-headers"]
 	path = submodules/neat-headers
 	url = https://github.com/pipieter/neat-headers
+[submodule "submodules/box2d"]
+	path = submodules/box2d
+	url = https://github.com/erincatto/box2d.git

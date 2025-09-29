@@ -3,5 +3,5 @@
 #include "components.hpp"
 
 void draw_system(body_s* body);
-void move_system(body_s* body, velocity_s* velocity);
-void player_input_system(ecs_s& ecs, entity_id entity, player_s*);
+void move_system(world_s* world);
+void player_input_system(body_s* body, player_s*);

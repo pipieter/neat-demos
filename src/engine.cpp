@@ -11,7 +11,9 @@ engine_s::engine_s() {
     SetTargetFPS(60);
 
     create_world(&ecs);
-    create_player(&ecs, 100.0f, 100.0f);
+    create_player(&ecs, 1.0f, 1.0f);
+
+    create_wall(&ecs, 5.0f, 5.0f, 2.0f, 2.0f);
 }
 
 engine_s::~engine_s() {
