@@ -10,7 +10,8 @@ set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(submodules/box2d)
 add_subdirectory(submodules/raylib)
 
-set(SOURCES src/main.cpp src/engine.cpp src/systems.cpp src/entities.cpp)
+set(SOURCES src/main.cpp src/engine.cpp src/systems.cpp src/entities.cpp
+            src/components.cpp)
 
 add_executable(ricochet ${SOURCES})
 

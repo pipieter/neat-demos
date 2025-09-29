@@ -29,6 +29,8 @@ enum class body_type {
 struct body_s {
     body_type type;
     b2BodyId  b2_id;
+
+    b2Vec2 center() const;
 };
 
 struct player_s {};

@@ -6,10 +6,11 @@
 #include <iostream>
 
 #include "components.hpp"
+#include "entities.hpp"
 
 void draw_system(body_s* body) {
-    const float scale    = 100.0f;
-    auto        position = b2Body_GetPosition(body->b2_id);
+    const float scale    = 20.0f;
+    auto        position = body->center();
 
     int                    shape_count = b2Body_GetShapeCount(body->b2_id);
     std::vector<b2ShapeId> shape_ids(shape_count);
@@ -42,7 +43,7 @@ void move_system(world_s* world) {
 }
 
 void player_input_system(body_s* body, player_s*) {
-    const float velocity = 3.0f;
+    const float velocity = 8.0f;
     float       dx       = 0;
     float       dy       = 0;
 
@@ -56,4 +57,12 @@ void player_input_system(body_s* body, player_s*) {
         dx += velocity;
 
     b2Body_SetLinearVelocity(body->b2_id, {dx, dy});
+}
+
+void shoot_system(ecs_s& ecs, body_s* body, player_s*) {
+    if (!IsKeyPressed(KEY_SPACE))
+        return;
+
+    auto position = body->center();
+    create_bullet(&ecs, position.x + 2.0, position.y, 1.0, 1.0);
 }
