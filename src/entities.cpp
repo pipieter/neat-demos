@@ -4,7 +4,16 @@
 
 #include "components.hpp"
 
-void create_world(ecs_s* ecs) {
+void remove_entity(ecs_s* ecs, entity_id entity) {
+    // The body needs to be manually removed from the bxo2d world, otherwise it will persist
+    if (ecs->components.has<body_s>(entity)) {
+        b2DestroyBody(ecs->components.get<body_s>(entity)->b2_id);
+    }
+
+    ecs->entities.remove(entity);
+}
+
+entity_id create_world(ecs_s* ecs) {
     auto entity = ecs->entities.create();
     auto world  = ecs->components.add<world_s>(entity);
 
@@ -16,9 +25,10 @@ void create_world(ecs_s* ecs) {
     world_def.gravity.y  = 0;
 
     world->b2_world = b2CreateWorld(&world_def);
+    return entity;
 }
 
-void create_player(ecs_s* ecs, float x, float y) {
+entity_id create_player(ecs_s* ecs, float x, float y) {
     auto [_, world] = ecs->components.first<world_s>();
     auto entity     = ecs->entities.create();
 
@@ -39,10 +49,15 @@ void create_player(ecs_s* ecs, float x, float y) {
     circle.center.x = 0;
     circle.center.y = 0;
 
+    shape_def.filter.categoryBits = 0x0001;
+    shape_def.filter.maskBits     = 0xFFFF;
+    shape_def.enableContactEvents = true;
+
     b2CreateCircleShape(body->b2_id, &shape_def, &circle);
+    return entity;
 }
 
-void create_wall(ecs_s* ecs, float x, float y, float w, float h) {
+entity_id create_wall(ecs_s* ecs, float x, float y, float w, float h) {
     auto [_, world] = ecs->components.first<world_s>();
     auto entity     = ecs->entities.create();
 
@@ -59,12 +74,19 @@ void create_wall(ecs_s* ecs, float x, float y, float w, float h) {
     b2Polygon  box              = b2MakeBox(w / 2, h / 2);
     shape_def.material.friction = 0.0f;
 
+    shape_def.filter.categoryBits = 0x0001;
+    shape_def.filter.maskBits     = 0xFFFF;
+    shape_def.enableContactEvents = true;
+
     b2CreatePolygonShape(body->b2_id, &shape_def, &box);
+    return entity;
 }
 
-void create_bullet(ecs_s* ecs, float x, float y, float dx, float dy) {
+entity_id create_bullet(ecs_s* ecs, float x, float y, float dx, float dy) {
     auto [_, world] = ecs->components.first<world_s>();
     auto entity     = ecs->entities.create();
+
+    (void)ecs->components.add<bullet_s>(entity);
 
     auto body  = ecs->components.add<body_s>(entity);
     body->type = body_type::circle;
@@ -82,7 +104,19 @@ void create_bullet(ecs_s* ecs, float x, float y, float dx, float dy) {
     circle.center.y                = 0;
     shape_def.material.restitution = 1.0f;
 
+    shape_def.filter.categoryBits = 0x0001;
+    shape_def.filter.maskBits     = 0xFFFF;
+    shape_def.enableContactEvents = true;
+
     b2CreateCircleShape(body->b2_id, &shape_def, &circle);
 
     b2Body_ApplyLinearImpulse(body->b2_id, {dx, dy}, {x, y}, true);
+    return entity;
+}
+
+entity_id create_enemy(ecs_s* ecs, float x, float y) {
+    auto entity = create_wall(ecs, x, y, 1, 1);
+    ecs->components.add<enemy_s>(entity);
+
+    return entity;
 }

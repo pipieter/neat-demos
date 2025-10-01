@@ -82,3 +82,44 @@ void shoot_system(ecs_s& ecs, body_s* body, player_s* player) {
         create_bullet(&ecs, player->aim_start.x, player->aim_start.y, direction.x, direction.y);
     }
 }
+
+entity_id get_entity_from_box2d_shape(ecs_s& ecs, b2ShapeId shape_id) {
+    b2BodyId body_id = b2Shape_GetBody(shape_id);
+    for (const auto& [entity, body] : ecs.iterate<body_s>()) {
+        if (B2_ID_EQUALS(body_id, body->b2_id)) {
+            return entity;
+        }
+    }
+    return neat::ecs::invalid_entity;
+}
+
+void bullet_enemy_collision_system(ecs_s& ecs, world_s* world) {
+    auto contacts = b2World_GetContactEvents(world->b2_world);
+
+    std::vector<entity_id> enemies_to_delete;
+
+    for (int i = 0; i < contacts.beginCount; i++) {
+        auto contact = contacts.beginEvents[i];
+        auto a       = get_entity_from_box2d_shape(ecs, contact.shapeIdA);
+        auto b       = get_entity_from_box2d_shape(ecs, contact.shapeIdB);
+
+        auto enemy = neat::ecs::invalid_entity;
+
+        // Check if bullet a hits enemy b
+        if ((ecs.components.has<bullet_s>(a) && ecs.components.has<enemy_s>(b))) {
+            enemy = b;
+        }
+        // Check if bullet a hits enemy b
+        else if ((ecs.components.has<bullet_s>(b) && ecs.components.has<enemy_s>(a))) {
+            enemy = a;
+        }
+
+        if (enemy != neat::ecs::invalid_entity) {
+            enemies_to_delete.push_back(enemy);
+        }
+    }
+
+    for (auto enemy : enemies_to_delete) {
+        remove_entity(&ecs, enemy);
+    }
+}

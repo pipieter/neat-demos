@@ -21,6 +21,8 @@ engine_s::engine_s() {
     create_wall(&ecs, 0.0f, 0.0f, 1.0f, 18.0f);
     create_wall(&ecs, 0.0f, 17.0f, 32.0f, 1.0f);
     create_wall(&ecs, 31.0f, 0.0f, 1.0f, 18.0f);
+
+    create_enemy(&ecs, 10.0, 10.0);
 }
 
 engine_s::~engine_s() {
@@ -34,6 +36,7 @@ void engine_s::run() {
         ClearBackground(RAYWHITE);
 
         ecs.systems.execute(move_system);
+        ecs.systems.execute(bullet_enemy_collision_system);
         ecs.systems.execute(player_input_system);
         ecs.systems.execute(shoot_system);
         ecs.systems.execute(draw_system);

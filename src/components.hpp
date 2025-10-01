@@ -7,6 +7,8 @@
 struct world_s;
 struct body_s;
 struct player_s;
+struct bullet_s;
+struct enemy_s;
 struct blocking_s;
 
 using entity_id = neat::ecs::entity_id;
@@ -14,6 +16,8 @@ using ecs_s     = neat::ecs::engine<
     world_s,
     body_s,
     player_s,
+    bullet_s,
+    enemy_s,
     blocking_s>;
 
 struct world_s {
@@ -37,5 +41,9 @@ struct player_s {
     b2Vec2 aim_start;
     b2Vec2 aim_target;
 };
+
+struct bullet_s {};
+
+struct enemy_s {};
 
 struct blocking_s {};
