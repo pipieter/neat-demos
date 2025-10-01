@@ -20,7 +20,7 @@ void draw_aim_system(player_s* player) {
     DrawLineEx({start.x, start.y}, {end.x, end.y}, 3.0, BLUE);
 }
 
-void move_system(world_s* world) {
+void physics_system(world_s* world) {
     b2World_Step(world->b2_world, GetFrameTime(), 4);
 }
 

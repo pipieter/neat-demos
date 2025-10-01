@@ -36,7 +36,7 @@ void engine_s::run() {
         ClearBackground(RAYWHITE);
 
         ecs.systems.execute(debug_system);
-        ecs.systems.execute(move_system);
+        ecs.systems.execute(physics_system);
         ecs.systems.execute(bullet_enemy_collision_system);
         ecs.systems.execute(player_input_system);
         ecs.systems.execute(shoot_system);
