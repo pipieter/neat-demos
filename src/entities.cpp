@@ -35,7 +35,7 @@ void create_player(ecs_s* ecs, float x, float y) {
 
     b2ShapeDef shape_def = b2DefaultShapeDef();
     b2Circle   circle;
-    circle.radius   = 1.0f;
+    circle.radius   = 0.5f;
     circle.center.x = 0;
     circle.center.y = 0;
 

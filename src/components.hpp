@@ -33,6 +33,9 @@ struct body_s {
     b2Vec2 center() const;
 };
 
-struct player_s {};
+struct player_s {
+    b2Vec2 aim_start;
+    b2Vec2 aim_target;
+};
 
 struct blocking_s {};

@@ -39,6 +39,12 @@ void draw_system(body_s* body) {
     }
 }
 
+void draw_aim_system(player_s* player) {
+    auto start = world_to_screen_space(player->aim_start);
+    auto end   = world_to_screen_space(player->aim_target);
+    DrawLineEx({start.x, start.y}, {end.x, end.y}, 3.0, BLUE);
+}
+
 void move_system(world_s* world) {
     b2World_Step(world->b2_world, GetFrameTime(), 4);
 }
@@ -60,10 +66,19 @@ void player_input_system(body_s* body, player_s*) {
     b2Body_SetLinearVelocity(body->b2_id, {dx, dy});
 }
 
-void shoot_system(ecs_s& ecs, body_s* body, player_s*) {
-    if (!IsKeyPressed(KEY_SPACE))
-        return;
+void shoot_system(ecs_s& ecs, body_s* body, player_s* player) {
+    auto mouse = GetMousePosition();
 
-    auto position = body->center();
-    create_bullet(&ecs, position.x + 2.0, position.y, 1.0, 1.0);
+    auto center    = body->center();
+    auto target    = screen_to_world_space({mouse.x, mouse.y});
+    auto direction = b2Normalize(target - center);
+    auto offset    = 0.75 * direction;
+
+    player->aim_start  = center + offset;
+    player->aim_target = target;
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        auto direction = b2Normalize(player->aim_target - player->aim_start);
+        create_bullet(&ecs, player->aim_start.x, player->aim_start.y, direction.x, direction.y);
+    }
 }

@@ -11,7 +11,7 @@ add_subdirectory(submodules/box2d)
 add_subdirectory(submodules/raylib)
 
 set(SOURCES src/main.cpp src/engine.cpp src/systems.cpp src/entities.cpp
-            src/components.cpp)
+            src/components.cpp src/common.cpp)
 
 add_executable(ricochet ${SOURCES})
 
