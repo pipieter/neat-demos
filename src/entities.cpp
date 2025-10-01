@@ -25,6 +25,7 @@ entity_id create_world(ecs_s* ecs) {
     world_def.gravity.y  = 0;
 
     world->b2_world = b2CreateWorld(&world_def);
+    world->debug    = true;
     return entity;
 }
 

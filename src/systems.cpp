@@ -9,34 +9,9 @@
 #include "components.hpp"
 #include "entities.hpp"
 
+void draw_b2_body(b2BodyId body_id, b2Vec2 center);
+
 void draw_system(body_s* body) {
-    const float scale    = render_scale;
-    auto        position = body->center();
-
-    int                    shape_count = b2Body_GetShapeCount(body->b2_id);
-    std::vector<b2ShapeId> shape_ids(shape_count);
-    b2Body_GetShapes(body->b2_id, shape_ids.data(), shape_ids.size());
-
-    for (auto shape_id : shape_ids) {
-        b2ShapeType type = b2Shape_GetType(shape_id);
-
-        if (type == b2_circleShape) {
-            b2Circle circle = b2Shape_GetCircle(shape_id);
-            float    x      = scale * position.x;
-            float    y      = scale * position.y;
-            float    r      = scale * circle.radius;
-            DrawCircle(x, y, r, GREEN);
-        } else if (type == b2_polygonShape) {
-            b2Polygon polygon = b2Shape_GetPolygon(shape_id);
-            float     w       = std::abs(2.0 * scale * polygon.vertices[0].x);
-            float     h       = std::abs(2.0 * scale * polygon.vertices[0].y);
-            float     x       = scale * position.x - w / 2;
-            float     y       = scale * position.y - h / 2;
-            DrawRectangle(x, y, w, h, RED);
-        } else {
-            std::cout << "Unsupported shape type " << type << std::endl;
-        }
-    }
 }
 
 void draw_aim_system(player_s* player) {
@@ -121,5 +96,52 @@ void bullet_enemy_collision_system(ecs_s& ecs, world_s* world) {
 
     for (auto enemy : enemies_to_delete) {
         remove_entity(&ecs, enemy);
+    }
+}
+
+void draw_b2_body(b2BodyId body_id, b2Vec2 center) {
+    const float            line_thickness = 5.0;
+    const float            scale          = render_scale;
+    int                    shape_count    = b2Body_GetShapeCount(body_id);
+    std::vector<b2ShapeId> shape_ids(shape_count);
+    b2Body_GetShapes(body_id, shape_ids.data(), shape_ids.size());
+
+    for (auto shape_id : shape_ids) {
+        b2ShapeType type = b2Shape_GetType(shape_id);
+
+        if (type == b2_circleShape) {
+            b2Circle circle = b2Shape_GetCircle(shape_id);
+            float    x      = scale * center.x;
+            float    y      = scale * center.y;
+            float    r      = scale * circle.radius;
+            DrawRing({x, y}, r - line_thickness, r, 0, 360, 32, GREEN);
+        } else if (type == b2_polygonShape) {
+            // Should be a rectangle
+            // The first vertex is always the half-width and half-height of the rectangle
+            b2Polygon polygon = b2Shape_GetPolygon(shape_id);
+            float     w       = scale * std::abs(2.0 * polygon.vertices[0].x);
+            float     h       = scale * std::abs(2.0 * polygon.vertices[0].y);
+            float     x       = scale * center.x - w / 2;
+            float     y       = scale * center.y - h / 2;
+            DrawRectangleLinesEx({x, y, w, h}, line_thickness, RED);
+        } else {
+            std::cout << "Unsupported shape type " << type << std::endl;
+        }
+    }
+}
+
+void debug_system(world_s* world) {
+    if (IsKeyPressed(KEY_GRAVE)) {
+        world->debug = !world->debug;
+    }
+}
+
+void debug_draw_system(ecs_s& ecs, world_s* world) {
+    if (!world->debug) {
+        return;
+    }
+
+    for (const auto& [body] : ecs.iterate_components<body_s>()) {
+        draw_b2_body(body->b2_id, body->center());
     }
 }

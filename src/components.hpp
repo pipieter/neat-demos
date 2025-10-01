@@ -21,6 +21,7 @@ using ecs_s     = neat::ecs::engine<
     blocking_s>;
 
 struct world_s {
+    bool      debug;
     ecs_s*    ecs;
     b2WorldId b2_world;
 };
