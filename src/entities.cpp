@@ -2,6 +2,7 @@
 
 #include <box2d/box2d.h>
 
+#include "assets.hpp"
 #include "components.hpp"
 
 void remove_entity(ecs_s* ecs, entity_id entity) {
@@ -24,8 +25,9 @@ entity_id create_world(ecs_s* ecs) {
     world_def.gravity.x  = 0;
     world_def.gravity.y  = 0;
 
-    world->b2_world = b2CreateWorld(&world_def);
-    world->debug    = true;
+    world->b2_world    = b2CreateWorld(&world_def);
+    world->debug       = true;
+    world->level.image = assets::level01_image;
     return entity;
 }
 
@@ -33,8 +35,14 @@ entity_id create_player(ecs_s* ecs, float x, float y) {
     auto [_, world] = ecs->components.first<world_s>();
     auto entity     = ecs->entities.create();
 
+    // Create player
     ecs->components.add<player_s>(entity);
 
+    // Create sprite
+    auto sprite    = ecs->components.add<sprite_s>(entity);
+    sprite->sprite = assets::player_sprite;
+
+    // Create body
     auto body  = ecs->components.add<body_s>(entity);
     body->type = body_type::circle;
 
@@ -87,8 +95,14 @@ entity_id create_bullet(ecs_s* ecs, float x, float y, float dx, float dy) {
     auto [_, world] = ecs->components.first<world_s>();
     auto entity     = ecs->entities.create();
 
+    // Create bullet
     (void)ecs->components.add<bullet_s>(entity);
 
+    // Create sprite
+    auto sprite    = ecs->components.add<sprite_s>(entity);
+    sprite->sprite = assets::bullet_sprite;
+
+    // Create body
     auto body  = ecs->components.add<body_s>(entity);
     body->type = body_type::circle;
 
@@ -118,6 +132,10 @@ entity_id create_bullet(ecs_s* ecs, float x, float y, float dx, float dy) {
 entity_id create_enemy(ecs_s* ecs, float x, float y) {
     auto entity = create_wall(ecs, x, y, 1, 1);
     ecs->components.add<enemy_s>(entity);
+
+    // Create sprite
+    auto sprite    = ecs->components.add<sprite_s>(entity);
+    sprite->sprite = assets::enemy_sprite;
 
     return entity;
 }

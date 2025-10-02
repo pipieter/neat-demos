@@ -11,7 +11,30 @@
 
 void draw_b2_body(b2BodyId body_id, b2Vec2 center);
 
-void draw_system(body_s* body) {
+void draw_system(ecs_s& ecs) {
+    const float scale = render_scale;
+    auto [_, world]   = ecs.components.first<world_s>();
+
+    auto level = world->level.image;
+    DrawTexturePro(level, {0, 0, (float)level.width, (float)level.height}, {0, 0, render_width, render_height}, {0, 0}, 0, WHITE);
+
+    // Draw sprites
+    for (const auto& [body, sprite] : ecs.iterate_components<body_s, sprite_s>()) {
+        auto  position = body->center();
+        float w        = scale * sprite->sprite.width / sprite->pixels_per_unit;
+        float h        = scale * sprite->sprite.height / sprite->pixels_per_unit;
+        float x        = scale * position.x - w / 2;
+        float y        = scale * position.y - h / 2;
+
+        if (sprite->flip) {
+            x += w;
+            y += h;
+            w = -w;
+            h = -h;
+        }
+
+        DrawTexturePro(sprite->sprite.texture, sprite->sprite.bounds(), {x, y, w, h}, {0, 0}, 0, WHITE);
+    }
 }
 
 void draw_aim_system(player_s* player) {

@@ -1,8 +1,11 @@
 #pragma once
 
 #include <box2d/box2d.h>
+#include <raylib.h>
 
 #include <neat/ecs.hpp>
+
+#include "assets.hpp"
 
 struct world_s;
 struct body_s;
@@ -10,6 +13,7 @@ struct player_s;
 struct bullet_s;
 struct enemy_s;
 struct blocking_s;
+struct sprite_s;
 
 using entity_id = neat::ecs::entity_id;
 using ecs_s     = neat::ecs::engine<
@@ -18,12 +22,16 @@ using ecs_s     = neat::ecs::engine<
     player_s,
     bullet_s,
     enemy_s,
-    blocking_s>;
+    blocking_s,
+    sprite_s>;
 
 struct world_s {
     bool      debug;
     ecs_s*    ecs;
     b2WorldId b2_world;
+    struct {
+        Texture2D image;
+    } level;
 };
 
 enum class body_type {
@@ -48,3 +56,9 @@ struct bullet_s {};
 struct enemy_s {};
 
 struct blocking_s {};
+
+struct sprite_s {
+    Sprite2D sprite;
+    float    pixels_per_unit {8};
+    bool     flip {false};
+};

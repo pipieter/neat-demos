@@ -8,9 +8,6 @@
 #include "systems.hpp"
 
 engine_s::engine_s() {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
-    InitWindow(1280, 720, "Ricochet");
-    SetTargetFPS(60);
     this->render = LoadRenderTexture(render_width, render_height);
 
     create_world(&ecs);
@@ -21,13 +18,13 @@ engine_s::engine_s() {
     create_wall(&ecs, 0.0f, 0.0f, 1.0f, 18.0f);
     create_wall(&ecs, 0.0f, 17.0f, 32.0f, 1.0f);
     create_wall(&ecs, 31.0f, 0.0f, 1.0f, 18.0f);
+    create_wall(&ecs, 1.0f, 12.0f, 30.0f, 1.0f);
 
     create_enemy(&ecs, 10.0, 10.0);
 }
 
 engine_s::~engine_s() {
     UnloadRenderTexture(render);
-    CloseWindow();
 }
 
 void engine_s::run() {
