@@ -60,5 +60,6 @@ struct blocking_s {};
 struct sprite_s {
     Sprite2D sprite;
     float    pixels_per_unit {8};
-    bool     flip {false};
+    bool     flip_h {false};
+    bool     flip_v {false};
 };

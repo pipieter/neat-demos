@@ -20,20 +20,23 @@ void draw_system(ecs_s& ecs) {
 
     // Draw sprites
     for (const auto& [body, sprite] : ecs.iterate_components<body_s, sprite_s>()) {
-        auto  position = body->center();
-        float w        = scale * sprite->sprite.width / sprite->pixels_per_unit;
-        float h        = scale * sprite->sprite.height / sprite->pixels_per_unit;
-        float x        = scale * position.x - w / 2;
-        float y        = scale * position.y - h / 2;
+        auto position      = body->center();
+        auto sprite_bounds = sprite->sprite.bounds();
 
-        if (sprite->flip) {
-            x += w;
-            y += h;
-            w = -w;
-            h = -h;
+        float w = scale * sprite->sprite.width / sprite->pixels_per_unit;
+        float h = scale * sprite->sprite.height / sprite->pixels_per_unit;
+        float x = scale * position.x - w / 2;
+        float y = scale * position.y - h / 2;
+
+        if (sprite->flip_h) {
+            sprite_bounds.width *= -1;
         }
 
-        DrawTexturePro(sprite->sprite.texture, sprite->sprite.bounds(), {x, y, w, h}, {0, 0}, 0, WHITE);
+        if (sprite->flip_v) {
+            sprite_bounds.height *= -1;
+        }
+
+        DrawTexturePro(sprite->sprite.texture, sprite_bounds, {x, y, w, h}, {0, 0}, 0, WHITE);
     }
 }
 
@@ -62,6 +65,10 @@ void player_input_system(body_s* body, player_s*) {
         dx += velocity;
 
     b2Body_SetLinearVelocity(body->b2_id, {dx, dy});
+}
+
+void player_aim_flip_system(player_s* player, sprite_s* sprite) {
+    sprite->flip_h = (player->aim_start.x > player->aim_target.x);
 }
 
 void shoot_system(ecs_s& ecs, body_s* body, player_s* player) {
