@@ -70,6 +70,8 @@ entity_id create_wall(ecs_s* ecs, float x, float y, float w, float h) {
     auto [_, world] = ecs->components.first<world_s>();
     auto entity     = ecs->entities.create();
 
+    (void)ecs->components.add<blocking_s>(entity);
+
     auto body  = ecs->components.add<body_s>(entity);
     body->type = body_type::rectangle;
 
@@ -96,7 +98,8 @@ entity_id create_bullet(ecs_s* ecs, float x, float y, float dx, float dy) {
     auto entity     = ecs->entities.create();
 
     // Create bullet
-    (void)ecs->components.add<bullet_s>(entity);
+    auto bullet                 = ecs->components.add<bullet_s>(entity);
+    bullet->remaining_ricochets = 2;
 
     // Create sprite
     auto sprite    = ecs->components.add<sprite_s>(entity);
@@ -132,6 +135,7 @@ entity_id create_bullet(ecs_s* ecs, float x, float y, float dx, float dy) {
 entity_id create_enemy(ecs_s* ecs, float x, float y) {
     auto entity = create_wall(ecs, x, y, 1, 1);
     ecs->components.add<enemy_s>(entity);
+    ecs->components.remove<blocking_s>(entity);
 
     // Create sprite
     auto sprite    = ecs->components.add<sprite_s>(entity);

@@ -83,7 +83,7 @@ void shoot_system(ecs_s& ecs, body_s* body, player_s* player) {
     player->aim_target = target;
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        auto direction = b2Normalize(player->aim_target - player->aim_start);
+        auto direction = bullet_speed * b2Normalize(player->aim_target - player->aim_start);
         create_bullet(&ecs, player->aim_start.x, player->aim_start.y, direction.x, direction.y);
     }
 }
@@ -108,24 +108,45 @@ void bullet_enemy_collision_system(ecs_s& ecs, world_s* world) {
         auto a       = get_entity_from_box2d_shape(ecs, contact.shapeIdA);
         auto b       = get_entity_from_box2d_shape(ecs, contact.shapeIdB);
 
-        auto enemy = neat::ecs::invalid_entity;
-
         // Check if bullet a hits enemy b
         if ((ecs.components.has<bullet_s>(a) && ecs.components.has<enemy_s>(b))) {
-            enemy = b;
+            ecs.components.get<bullet_s>(a)->remaining_ricochets--;
+            ecs.components.add<marked_for_deletion_s>(b);
         }
-        // Check if bullet a hits enemy b
+        // Check if bullet b hits enemy a
         else if ((ecs.components.has<bullet_s>(b) && ecs.components.has<enemy_s>(a))) {
-            enemy = a;
-        }
-
-        if (enemy != neat::ecs::invalid_entity) {
-            enemies_to_delete.push_back(enemy);
+            ecs.components.add<marked_for_deletion_s>(a);
+            ecs.components.get<bullet_s>(b)->remaining_ricochets--;
         }
     }
+}
 
-    for (auto enemy : enemies_to_delete) {
-        remove_entity(&ecs, enemy);
+void bullet_wall_collision_system(ecs_s& ecs, world_s* world) {
+    auto contacts = b2World_GetContactEvents(world->b2_world);
+
+    for (int i = 0; i < contacts.beginCount; i++) {
+        auto contact = contacts.beginEvents[i];
+        auto a       = get_entity_from_box2d_shape(ecs, contact.shapeIdA);
+        auto b       = get_entity_from_box2d_shape(ecs, contact.shapeIdB);
+
+        // Check if bullet a hits wall b
+        if ((ecs.components.has<bullet_s>(a) && ecs.components.has<blocking_s>(b))) {
+            auto bullet = ecs.components.get<bullet_s>(a);
+            bullet->remaining_ricochets--;
+        }
+        // Check if bullet a hits wall b
+        else if ((ecs.components.has<bullet_s>(b) && ecs.components.has<blocking_s>(a))) {
+            auto bullet = ecs.components.get<bullet_s>(b);
+            bullet->remaining_ricochets--;
+        }
+    }
+}
+
+void bullet_destroy_system(ecs_s& ecs) {
+    for (const auto& [entity, bullet] : ecs.iterate<bullet_s>()) {
+        if (bullet->remaining_ricochets < 0) {
+            ecs.components.add<marked_for_deletion_s>(entity);
+        }
     }
 }
 
@@ -173,5 +194,11 @@ void debug_draw_system(ecs_s& ecs, world_s* world) {
 
     for (const auto& [body] : ecs.iterate_components<body_s>()) {
         draw_b2_body(body->b2_id, body->center());
+    }
+}
+
+void deletion_system(ecs_s& ecs) {
+    for (const auto& [entity, _] : ecs.iterate<marked_for_deletion_s>()) {
+        remove_entity(&ecs, entity);
     }
 }

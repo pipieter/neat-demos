@@ -3,7 +3,13 @@
 #include <box2d/box2d.h>
 #include <raylib.h>
 
+// Game constants
+
 const float unit = 1.0f;
+
+const float bullet_speed = 4.0 * unit;
+
+// Render data
 
 const float world_width  = 32.0f;
 const float world_height = 18.0f;

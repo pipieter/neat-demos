@@ -35,9 +35,12 @@ void engine_s::run() {
         ecs.systems.execute(debug_system);
         ecs.systems.execute(physics_system);
         ecs.systems.execute(bullet_enemy_collision_system);
+        ecs.systems.execute(bullet_wall_collision_system);
+        ecs.systems.execute(bullet_destroy_system);
         ecs.systems.execute(player_input_system);
         ecs.systems.execute(player_aim_flip_system);
         ecs.systems.execute(shoot_system);
+        ecs.systems.execute(deletion_system);
         ecs.systems.execute(draw_system);
         ecs.systems.execute(draw_aim_system);
         ecs.systems.execute(debug_draw_system);
