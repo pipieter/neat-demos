@@ -12,8 +12,8 @@ int main() {
     auto  world_id = create_world(ecs);
     auto  world    = ecs.components.get<world_s>(world_id);
 
-    (void)create_ball(ecs, 1.0, 1.0, 3.0, 1.0);
-    (void)create_maze(ecs, 5.0, -1.0, 0.0, 10.0, 1.0, 10.0);
+    (void)create_ball(ecs, 0.0, 1.0, 0.0, 1.0);
+    (void)create_maze(ecs, 0.0, -1.0, 0.0, 10.0, 1.0, 10.0);
     (void)create_light(ecs, world->shader, 0.0, 5.0, 0.0);
 
     while (!WindowShouldClose()) {

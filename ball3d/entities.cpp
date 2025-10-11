@@ -52,9 +52,9 @@ entity_id create_maze(ecs_s& ecs, float cx, float cy, float cz, float w, float h
 
     body_s* body = ecs.components.add<body_s>(entity);
     body->type   = body_type::box;
-    body->box.x  = cx - w / 2;
-    body->box.y  = cy - h / 2;
-    body->box.z  = cz - l / 2;
+    body->box.x  = cx;
+    body->box.y  = cy;
+    body->box.z  = cz;
     body->box.w  = w;
     body->box.h  = h;
     body->box.l  = l;
