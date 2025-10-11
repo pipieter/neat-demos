@@ -21,6 +21,9 @@ int main() {
     (void)create_maze(ecs, 0.0, -1.0, 0.0, 3.0, 1.0, 10.0);
     (void)create_light(ecs, 0.0, 5.0, 0.0);
 
+    auto [_, physics] = ecs.components.first<physics_s>();
+    physics->engine.Ready();
+
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLUE);
