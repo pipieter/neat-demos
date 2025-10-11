@@ -178,6 +178,8 @@ class PhysicsEngine {
     std::shared_ptr<MyBodyActivationListener>          _body_activation_listener;
     std::shared_ptr<MyContactListener>                 _contact_listener;
 
+    JPH::BodyInterface* _interface;
+
    public:
     PhysicsEngine() {
         _allocator  = std::make_shared<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
@@ -201,6 +203,8 @@ class PhysicsEngine {
         _physics_system->SetBodyActivationListener(_body_activation_listener.get());
         _physics_system->SetContactListener(_contact_listener.get());
         _physics_system->SetGravity({0, cGravity, 0});
+
+        _interface = &_physics_system->GetBodyInterface();
     }
 
     ~PhysicsEngine() {}
@@ -215,7 +219,7 @@ class PhysicsEngine {
         _physics_system->Update(dt, cCollisionSteps, _allocator.get(), _job_system.get());
     };
 
-    JPH::BodyInterface& Interface() const {
-        return _physics_system->GetBodyInterface();
+    JPH::BodyInterface* Interface() const {
+        return _interface;
     }
 };
