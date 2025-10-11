@@ -10,3 +10,9 @@
 [submodule "submodules/JoltPhysics"]
 	path = submodules/JoltPhysics
 	url = https://github.com/jrouwe/JoltPhysics.git
+[submodule "submodules/r3d"]
+	path = submodules/r3d
+	url = https://github.com/Bigfoot71/r3d.git
+[submodule "submodules/assimp"]
+	path = submodules/assimp
+	url = https://github.com/assimp/assimp.git
