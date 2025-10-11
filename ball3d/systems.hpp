@@ -2,6 +2,6 @@
 
 #include "components.hpp"
 
-void physics_system(ecs_s& ecs);
+void physics_system(physics_s* physics);
 void player_input_system(world_s* world);
 void draw_system(ecs_s& ecs);
