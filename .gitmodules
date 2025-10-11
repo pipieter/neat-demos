@@ -7,3 +7,6 @@
 [submodule "submodules/box2d"]
 	path = submodules/box2d
 	url = https://github.com/erincatto/box2d.git
+[submodule "submodules/JoltPhysics"]
+	path = submodules/JoltPhysics
+	url = https://github.com/jrouwe/JoltPhysics.git
