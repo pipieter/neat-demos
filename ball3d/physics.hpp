@@ -21,7 +21,7 @@
 #include <memory>
 
 // Callback for traces, connect this to your own trace function if you have one
-static void TraceImpl(const char* inFMT, ...) {
+inline void TraceImpl(const char* inFMT, ...) {
     // Format the message
     va_list list;
     va_start(list, inFMT);
@@ -34,7 +34,7 @@ static void TraceImpl(const char* inFMT, ...) {
 }
 
 // Callback for asserts, connect this to your own assert handler if you have one
-static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine) {
+inline bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine) {
     // Print to the TTY
     std::cout << inFile << ":" << inLine << ": (" << inExpression << ") " << (inMessage != nullptr ? inMessage : "") << std::endl;
 
@@ -135,22 +135,22 @@ class ObjectVsBroadPhaseLayerFilterImpl : public JPH::ObjectVsBroadPhaseLayerFil
 class MyContactListener : public JPH::ContactListener {
    public:
     // See: ContactListener
-    virtual JPH::ValidateResult OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& inCollisionResult) override {
+    virtual JPH::ValidateResult OnContactValidate(const JPH::Body&, const JPH::Body&, JPH::RVec3Arg, const JPH::CollideShapeResult&) override {
         std::cout << "Contact validate callback" << std::endl;
 
         // Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
         return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
     }
 
-    virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override {
+    virtual void OnContactAdded(const JPH::Body&, const JPH::Body&, const JPH::ContactManifold&, JPH::ContactSettings&) override {
         std::cout << "A contact was added" << std::endl;
     }
 
-    virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override {
+    virtual void OnContactPersisted(const JPH::Body&, const JPH::Body&, const JPH::ContactManifold&, JPH::ContactSettings&) override {
         std::cout << "A contact was persisted" << std::endl;
     }
 
-    virtual void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override {
+    virtual void OnContactRemoved(const JPH::SubShapeIDPair&) override {
         std::cout << "A contact was removed" << std::endl;
     }
 };
@@ -158,11 +158,11 @@ class MyContactListener : public JPH::ContactListener {
 // An example activation listener
 class MyBodyActivationListener : public JPH::BodyActivationListener {
    public:
-    virtual void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override {
+    virtual void OnBodyActivated(const JPH::BodyID&, JPH::uint64) override {
         std::cout << "A body got activated" << std::endl;
     }
 
-    virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override {
+    virtual void OnBodyDeactivated(const JPH::BodyID&, JPH::uint64) override {
         std::cout << "A body went to sleep" << std::endl;
     }
 };
@@ -200,7 +200,6 @@ class PhysicsEngine {
 
         _physics_system->SetBodyActivationListener(_body_activation_listener.get());
         _physics_system->SetContactListener(_contact_listener.get());
-
         _physics_system->SetGravity({0, cGravity, 0});
     }
 
