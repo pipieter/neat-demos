@@ -12,7 +12,7 @@ add_subdirectory(../submodules/raylib raylib)
 add_subdirectory(../submodules/assimp assimp)
 add_subdirectory(../submodules/r3d r3d)
 
-set(SOURCES main.cpp systems.cpp entities.cpp)
+set(SOURCES main.cpp systems.cpp entities.cpp physics.cpp)
 
 add_executable(ball3d ${SOURCES})
 
