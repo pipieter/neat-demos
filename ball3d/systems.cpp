@@ -48,6 +48,9 @@ void draw_system(ecs_s& ecs) {
     }
 
     R3D_End();
+
+    const char* fps = TextFormat("FPS: %.1f", 1.0f / GetFrameTime());
+    DrawText(fps, 10, 10, 20, BLACK);
 }
 
 void debug_ball_respawn(body_s* body, ball_s*) {
