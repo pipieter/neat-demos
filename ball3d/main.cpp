@@ -12,9 +12,10 @@ int main() {
     JPH::Factory::sInstance = new JPH::Factory();
     JPH::RegisterTypes();
 
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1280, 720, "Ball 3D");
     SetTargetFPS(60);
-    R3D_Init(1280, 720, 0);
+    R3D_Init(1920, 1080, R3D_FLAG_FXAA);
 
     ecs_s ecs;
     (void)create_world(ecs);
