@@ -6,12 +6,15 @@
 #include "systems.hpp"
 
 int main() {
+    std::cout << "Starting program." << std::endl;
+
     JPH::RegisterDefaultAllocator();
     JPH::Trace              = TraceImpl;
     JPH::AssertFailed       = AssertFailedImpl;
     JPH::Factory::sInstance = new JPH::Factory();
     JPH::RegisterTypes();
 
+    SetTraceLogLevel(LOG_ERROR);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1280, 720, "Ball 3D");
     SetTargetFPS(60);
@@ -30,10 +33,11 @@ int main() {
         BeginDrawing();
         ClearBackground(BLUE);
 
+        ecs.systems.execute(log_enable_system);
         ecs.systems.execute(physics_system);
-        ecs.systems.execute(draw_system);
         ecs.systems.execute(ball_reset_system);
         ecs.systems.execute(platform_rotation_system);
+        ecs.systems.execute(draw_system);
 
         EndDrawing();
     }
@@ -43,6 +47,8 @@ int main() {
     JPH::Factory::sInstance = nullptr;
 
     CloseWindow();
+
+    std::cout << "Ending program." << std::endl;
 
     return 0;
 }

@@ -5,7 +5,8 @@
 // Note: this file is heavily based on the Jolt Physics Hello World implementation, due to the simplicities of that program and this game
 // https://github.com/jrouwe/JoltPhysics/blob/master/HelloWorld/HelloWorld.cpp
 
-bool JPH_EnableDebug = true;
+// Global variable to control debugging
+volatile bool JPH_EnableDebug = false;
 
 bool JPH_GetDebugStatus() {
     return JPH_EnableDebug;

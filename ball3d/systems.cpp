@@ -48,6 +48,7 @@ void draw_system(ecs_s& ecs) {
 
     const char* fps = TextFormat("FPS: %.1f", 1.0f / GetFrameTime());
     DrawText(fps, 10, 10, 20, BLACK);
+    DrawText("Press '1' to enable logging, press '2' to disable it.", 10, 35, 20, BLACK);
 }
 
 void ball_reset_system(body_s* body, ball_s*) {
@@ -79,4 +80,15 @@ void platform_rotation_system(body_s* body, rotation_s* rotation) {
     auto position      = body->interface->GetPosition(body->id);
 
     body->interface->MoveKinematic(body->id, position, rotation_quat, dt);
+}
+
+void log_enable_system(ecs_s&) {
+    if (IsKeyPressed(KEY_ONE)) {
+        SetTraceLogLevel(LOG_DEBUG);
+        JPH_SetDebugStatus(true);
+    }
+    if (IsKeyPressed(KEY_TWO)) {
+        SetTraceLogLevel(LOG_FATAL);
+        JPH_SetDebugStatus(false);
+    }
 }
