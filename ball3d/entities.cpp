@@ -52,7 +52,7 @@ entity_id create_ball(ecs_s& ecs, float cx, float cy, float cz, float r) {
     return entity;
 }
 
-entity_id create_maze(ecs_s& ecs, float cx, float cy, float cz, float w, float h, float l) {
+entity_id create_wall(ecs_s& ecs, float cx, float cy, float cz, float w, float h, float l) {
     entity_id entity  = ecs.entities.create();
     auto [_, physics] = ecs.components.first<physics_s>();
     auto interface    = physics->engine.Interface();
@@ -65,13 +65,57 @@ entity_id create_maze(ecs_s& ecs, float cx, float cy, float cz, float w, float h
 
     body_s*                   body      = ecs.components.add<body_s>(entity);
     JPH::BoxShape*            box_shape = new JPH::BoxShape(JPH::Vec3(w / 2, h / 2, l / 2));
-    JPH::BodyCreationSettings box_settings(box_shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::MOVING);
+    JPH::BodyCreationSettings box_settings(box_shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::NON_MOVING);
+    // Prevents the wall from rotating when attached to a moving platform. This is somewhat hacky, but
+    // should be fine for the purposes of this demo.
+    box_settings.mInertiaMultiplier = 1e10;
+
     body->interface = interface;
     body->id        = interface->CreateAndAddBody(box_settings, JPH::EActivation::Activate);
 
-    (void)ecs.components.add<rotation_s>(entity);
-
     return entity;
+}
+
+void constrain_body(JPH::PhysicsSystem* physics_system, const JPH::BodyLockInterface* bli, const JPH::BodyID& body1_id, const JPH::BodyID& body2_id) {
+    JPH::FixedConstraintSettings settings;
+    settings.mAutoDetectPoint = true;  // attach at current relative pose
+    settings.mSpace           = JPH::EConstraintSpace::WorldSpace;
+    settings.mEnabled         = true;
+
+    JPH::Body* body1 = bli->TryGetBody(body1_id);
+    JPH::Body* body2 = bli->TryGetBody(body2_id);
+    body2->SetMotionType(JPH::EMotionType::Dynamic);
+    JPH::TwoBodyConstraint* constraint = settings.Create(*body1, *body2);
+    constraint->SetEnabled(true);
+
+    physics_system->AddConstraint(constraint);
+}
+
+entity_id create_box(ecs_s& ecs, float cx, float cy, float cz, float w, float h, float l, float thickness) {
+    auto [_, physics]   = ecs.components.first<physics_s>();
+    auto lock_interface = physics->engine.LockInterface();
+    auto physics_system = physics->engine.PhysicsSystem();
+
+    entity_id floor = create_wall(ecs, cx, cy - h / 2 - thickness / 2, cz, w + 2 * thickness, thickness, l + 2 * thickness);
+    entity_id wall1 = create_wall(ecs, cx, cy, cz + l / 2 + thickness / 2, w + 2 * thickness, h + 2 * thickness, thickness);  // Top wall
+    entity_id wall2 = create_wall(ecs, cx, cy, cz - l / 2 - thickness / 2, w + 2 * thickness, h + 2 * thickness, thickness);  // Bottom wall
+    entity_id wall3 = create_wall(ecs, cx - w / 2 - thickness / 2, cy, cz, thickness, h + 2 * thickness, l + 2 * thickness);  // Left wall
+    entity_id wall4 = create_wall(ecs, cx + w / 2 + thickness / 2, cy, cz, thickness, h + 2 * thickness, l + 2 * thickness);  // Right wall
+
+    body_s* floor_body = ecs.components.get<body_s>(floor);
+    body_s* wall1_body = ecs.components.get<body_s>(wall1);
+    body_s* wall2_body = ecs.components.get<body_s>(wall2);
+    body_s* wall3_body = ecs.components.get<body_s>(wall3);
+    body_s* wall4_body = ecs.components.get<body_s>(wall4);
+
+    constrain_body(physics_system.get(), lock_interface, floor_body->id, wall1_body->id);
+    constrain_body(physics_system.get(), lock_interface, floor_body->id, wall2_body->id);
+    constrain_body(physics_system.get(), lock_interface, floor_body->id, wall3_body->id);
+    constrain_body(physics_system.get(), lock_interface, floor_body->id, wall4_body->id);
+
+    (void)ecs.components.add<rotation_s>(floor);
+
+    return floor;
 }
 
 entity_id create_light(ecs_s& ecs, float x, float y, float z) {

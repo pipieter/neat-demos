@@ -19,8 +19,9 @@ int main() {
     ecs_s ecs;
     (void)create_world(ecs);
     (void)create_ball(ecs, 0.0, 10.0, 0.0, 1.0);
-    (void)create_maze(ecs, 0.0, -1.0, 0.0, 3.0, 1.0, 10.0);
-    (void)create_maze(ecs, 3.0, -4.0, 0.0, 4.0, 0.5, 2.0);
+    //(void)create_wall(ecs, 0.0, -1.0, 0.0, 3.0, 1.0, 10.0);
+    (void)create_box(ecs, 0.0, -1.0, 0.0, 5.0, 1.5, 10.0, 0.2);
+    //(void)create_wall(ecs, 3.0, -6.0, 0.0, 4.0, 0.5, 2.0);
     (void)create_light(ecs, 0.0, 5.0, 0.0);
 
     auto [_, physics] = ecs.components.first<physics_s>();

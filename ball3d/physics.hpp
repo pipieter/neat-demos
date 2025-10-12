@@ -13,6 +13,7 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Constraints/FixedConstraint.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/RegisterTypes.h>
@@ -178,7 +179,8 @@ class PhysicsEngine {
     std::shared_ptr<MyBodyActivationListener>          _body_activation_listener;
     std::shared_ptr<MyContactListener>                 _contact_listener;
 
-    JPH::BodyInterface* _interface;
+    JPH::BodyInterface*           _interface;
+    const JPH::BodyLockInterface* _lock_interface;
 
    public:
     PhysicsEngine() {
@@ -204,7 +206,8 @@ class PhysicsEngine {
         _physics_system->SetContactListener(_contact_listener.get());
         _physics_system->SetGravity({0, cGravity, 0});
 
-        _interface = &_physics_system->GetBodyInterface();
+        _interface      = &_physics_system->GetBodyInterface();
+        _lock_interface = &_physics_system->GetBodyLockInterface();
     }
 
     ~PhysicsEngine() {}
@@ -221,5 +224,13 @@ class PhysicsEngine {
 
     JPH::BodyInterface* Interface() const {
         return _interface;
+    }
+
+    const JPH::BodyLockInterface* LockInterface() const {
+        return _lock_interface;
+    }
+
+    std::shared_ptr<JPH::PhysicsSystem> PhysicsSystem() {
+        return _physics_system;
     }
 };

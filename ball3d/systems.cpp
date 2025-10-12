@@ -59,13 +59,13 @@ void debug_ball_respawn(body_s* body, ball_s*) {
 }
 
 void debug_rotation_system(body_s* body, rotation_s*) {
-    float amount_x = 0.50 * GetFrameTime();
-    float amount_z = 0.25 * GetFrameTime();
+    float amount_y = 0.50 * GetFrameTime();
+    float amount_z = 0.25 * std::sin(GetTime() / 10);
 
     auto old_rotation = body->interface->GetRotation(body->id);
-    auto rotation_x   = JPH::Quat::sRotation({1, 0, 0}, old_rotation.GetRotationAngle({1, 0, 0}) + amount_x);
-    auto rotation_z   = JPH::Quat::sRotation({0, 0, 1}, old_rotation.GetRotationAngle({0, 0, 1}) + amount_z);
-    auto new_rotation = rotation_x * rotation_z;
+    auto rotation_y   = JPH::Quat::sRotation({0, 1, 0}, old_rotation.GetRotationAngle({0, 1, 0}) + amount_y);
+    auto rotation_z   = JPH::Quat::sRotation({0, 0, 1}, amount_z);
+    auto new_rotation = rotation_y * rotation_z;
 
     body->interface->SetRotation(body->id, new_rotation, JPH::EActivation::Activate);
 }
