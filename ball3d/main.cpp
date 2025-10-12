@@ -20,9 +20,7 @@ int main() {
     ecs_s ecs;
     (void)create_world(ecs);
     (void)create_ball(ecs, 0.0, 3.0, 0.0, 1.0);
-    //(void)create_wall(ecs, 0.0, -1.0, 0.0, 3.0, 1.0, 10.0);
     (void)create_box(ecs, 0.0, -1.0, 0.0, 5.0, 1.5, 10.0, 0.2);
-    //(void)create_wall(ecs, 3.0, -6.0, 0.0, 4.0, 0.5, 2.0);
     (void)create_light(ecs, 0.0, 5.0, 0.0);
 
     auto [_, physics] = ecs.components.first<physics_s>();
@@ -33,10 +31,9 @@ int main() {
         ClearBackground(BLUE);
 
         ecs.systems.execute(physics_system);
-        ecs.systems.execute(player_input_system);
         ecs.systems.execute(draw_system);
-        ecs.systems.execute(debug_ball_respawn);
-        ecs.systems.execute(debug_rotation_system);
+        ecs.systems.execute(ball_reset_system);
+        ecs.systems.execute(platform_rotation_system);
 
         EndDrawing();
     }

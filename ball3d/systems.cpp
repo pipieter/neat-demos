@@ -6,9 +6,6 @@ void physics_system(physics_s* physics) {
     physics->engine.Update(GetFrameTime());
 }
 
-void player_input_system(world_s*) {
-}
-
 void draw_body(body_s* body, mesh_s* mesh) {
     auto position = body->interface->GetPosition(body->id);
     auto rotation = body->interface->GetRotation(body->id);
@@ -53,14 +50,14 @@ void draw_system(ecs_s& ecs) {
     DrawText(fps, 10, 10, 20, BLACK);
 }
 
-void debug_ball_respawn(body_s* body, ball_s*) {
+void ball_reset_system(body_s* body, ball_s*) {
     if (IsKeyPressed(KEY_R)) {
-        body->interface->SetPosition(body->id, {0, 10, 0}, JPH::EActivation::Activate);
+        body->interface->SetPosition(body->id, {0, 3.0, 0}, JPH::EActivation::Activate);
         body->interface->SetLinearVelocity(body->id, {0, 0, 0});
     }
 }
 
-void debug_rotation_system(body_s* body, rotation_s* rotation) {
+void platform_rotation_system(body_s* body, rotation_s* rotation) {
     // On the very first frame, GetFrameTime() equals zero. MoveKinematic expects a value > 0.0.
     float dt        = std::max(GetFrameTime(), 1.0f / 60.0f);
     float velocity  = 0.5f * dt;
