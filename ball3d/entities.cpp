@@ -47,7 +47,9 @@ entity_id create_ball(ecs_s& ecs, float cx, float cy, float cz, float r) {
     JPH::BodyCreationSettings sphere_settings(sphere_shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Layers::MOVING);
     sphere_settings.mRestitution = 0.5f;  // A bit of bounce
     body->interface              = interface;
-    body->body_id                = interface->CreateAndAddBody(sphere_settings, JPH::EActivation::Activate);
+    body->id                     = interface->CreateAndAddBody(sphere_settings, JPH::EActivation::Activate);
+
+    (void)ecs.components.add<ball_s>(entity);
 
     return entity;
 }
@@ -65,9 +67,11 @@ entity_id create_maze(ecs_s& ecs, float cx, float cy, float cz, float w, float h
 
     body_s*                   body      = ecs.components.add<body_s>(entity);
     JPH::BoxShape*            box_shape = new JPH::BoxShape(JPH::Vec3(w / 2, h / 2, l / 2));
-    JPH::BodyCreationSettings box_settings(box_shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::MOVING);
+    JPH::BodyCreationSettings box_settings(box_shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::MOVING);
     body->interface = interface;
-    body->body_id   = interface->CreateAndAddBody(box_settings, JPH::EActivation::Activate);
+    body->id        = interface->CreateAndAddBody(box_settings, JPH::EActivation::Activate);
+
+    (void)ecs.components.add<wall_s>(entity);
 
     return entity;
 }

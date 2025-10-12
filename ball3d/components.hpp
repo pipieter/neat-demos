@@ -11,10 +11,12 @@ struct world_s;
 struct physics_s;
 struct body_s;
 struct mesh_s;
+struct wall_s;
+struct ball_s;
 struct light_s;
 
 using entity_id = neat::ecs::entity_id;
-using ecs_s     = neat::ecs::engine<world_s, physics_s, body_s, mesh_s, light_s>;
+using ecs_s     = neat::ecs::engine<world_s, physics_s, body_s, mesh_s, wall_s, ball_s, light_s>;
 
 struct world_s {
     ecs_s*   ecs;
@@ -26,13 +28,20 @@ struct physics_s {
 };
 
 struct body_s {
+    // TODO this needs to be manually deleted from the physics engine
     JPH::BodyInterface* interface;
-    JPH::BodyID         body_id;
+    JPH::BodyID         id;
 };
 
 struct mesh_s {
     R3D_Mesh     mesh;
     R3D_Material material;
+};
+
+struct wall_s {
+};
+
+struct ball_s {
 };
 
 struct light_s {

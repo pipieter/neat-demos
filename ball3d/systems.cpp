@@ -11,8 +11,30 @@ void player_input_system(world_s* world) {
 }
 
 void draw_body(body_s* body, mesh_s* mesh) {
-    auto center    = body->interface->GetPosition(body->body_id);
-    auto transform = MatrixTranslate(center.GetX(), center.GetY(), center.GetZ());
+    auto position = body->interface->GetPosition(body->id);
+    auto rotation = body->interface->GetRotation(body->id);
+
+    JPH::RMat44 jolt_transform = JPH::RMat44::sRotationTranslation(rotation, position);
+    JPH::Float4 vectors[4];
+    jolt_transform.StoreFloat4x4(vectors);
+    Matrix transform;
+    transform.m0  = vectors[0].x;
+    transform.m1  = vectors[0].y;
+    transform.m2  = vectors[0].z;
+    transform.m3  = vectors[0].w;
+    transform.m4  = vectors[1].x;
+    transform.m5  = vectors[1].y;
+    transform.m6  = vectors[1].z;
+    transform.m7  = vectors[1].w;
+    transform.m8  = vectors[2].x;
+    transform.m9  = vectors[2].y;
+    transform.m10 = vectors[2].z;
+    transform.m11 = vectors[2].w;
+    transform.m12 = vectors[3].x;
+    transform.m13 = vectors[3].y;
+    transform.m14 = vectors[3].z;
+    transform.m15 = vectors[3].w;
+
     R3D_DrawMesh(&mesh->mesh, &mesh->material, transform);
 }
 
@@ -27,4 +49,23 @@ void draw_system(ecs_s& ecs) {
     }
 
     R3D_End();
+}
+
+void debug_ball_respawn(body_s* body, ball_s*) {
+    if (IsKeyPressed(KEY_R)) {
+        body->interface->SetPosition(body->id, {0, 10, 0}, JPH::EActivation::Activate);
+        body->interface->SetLinearVelocity(body->id, {0, 0, 0});
+    }
+}
+
+void debug_wall_rotation_system(body_s* body, wall_s*) {
+    float amount_x = 0.50 * GetFrameTime();
+    float amount_z = 0.25 * GetFrameTime();
+
+    auto old_rotation = body->interface->GetRotation(body->id);
+    auto rotation_x   = JPH::Quat::sRotation({1, 0, 0}, old_rotation.GetRotationAngle({1, 0, 0}) + amount_x);
+    auto rotation_z   = JPH::Quat::sRotation({0, 0, 1}, old_rotation.GetRotationAngle({0, 0, 1}) + amount_z);
+    auto new_rotation = rotation_x * rotation_z;
+
+    body->interface->SetRotation(body->id, new_rotation, JPH::EActivation::Activate);
 }
