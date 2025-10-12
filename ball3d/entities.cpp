@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-#include "assets.hpp"
-
 float world_ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
 
 entity_id create_world(ecs_s& ecs) {
