@@ -218,7 +218,7 @@ class PhysicsEngine {
     }
 
     void Update(double dt) {
-        const int cCollisionSteps = 1;
+        const int cCollisionSteps = 4;
         _physics_system->Update(dt, cCollisionSteps, _allocator.get(), _job_system.get());
     };
 

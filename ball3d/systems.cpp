@@ -6,8 +6,7 @@ void physics_system(physics_s* physics) {
     physics->engine.Update(GetFrameTime());
 }
 
-void player_input_system(world_s* world) {
-    UpdateCamera(&world->camera, CAMERA_THIRD_PERSON);
+void player_input_system(world_s*) {
 }
 
 void draw_body(body_s* body, mesh_s* mesh) {
@@ -58,14 +57,26 @@ void debug_ball_respawn(body_s* body, ball_s*) {
     }
 }
 
-void debug_rotation_system(body_s* body, rotation_s*) {
-    float amount_y = 0.50 * GetFrameTime();
-    float amount_z = 0.25 * std::sin(GetTime() / 10);
+void debug_rotation_system(body_s* body, rotation_s* rotation) {
+    // On the very first frame, GetFrameTime() equals zero. MoveKinematic expects a value > 0.0.
+    float dt        = std::max(GetFrameTime(), 1.0f / 60.0f);
+    float velocity  = 0.5f * dt;
+    float max_angle = 3.141592 / 8.0;
 
-    auto old_rotation = body->interface->GetRotation(body->id);
-    auto rotation_y   = JPH::Quat::sRotation({0, 1, 0}, old_rotation.GetRotationAngle({0, 1, 0}) + amount_y);
-    auto rotation_z   = JPH::Quat::sRotation({0, 0, 1}, amount_z);
-    auto new_rotation = rotation_y * rotation_z;
+    if (IsKeyDown(KEY_W))
+        rotation->angle_z -= velocity;
+    if (IsKeyDown(KEY_A))
+        rotation->angle_x -= velocity;
+    if (IsKeyDown(KEY_S))
+        rotation->angle_z += velocity;
+    if (IsKeyDown(KEY_D))
+        rotation->angle_x += velocity;
 
-    body->interface->SetRotation(body->id, new_rotation, JPH::EActivation::Activate);
+    rotation->angle_x = std::clamp(rotation->angle_x, -max_angle, max_angle);
+    rotation->angle_z = std::clamp(rotation->angle_z, -max_angle, max_angle);
+
+    auto rotation_quat = JPH::Quat::sRotation({1, 0, 0}, rotation->angle_x) * JPH::Quat::sRotation({0, 0, 1}, rotation->angle_z);
+    auto position      = body->interface->GetPosition(body->id);
+
+    body->interface->MoveKinematic(body->id, position, rotation_quat, dt);
 }

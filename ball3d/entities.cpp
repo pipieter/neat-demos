@@ -15,8 +15,8 @@ entity_id create_world(ecs_s& ecs) {
     world->camera.up.y       = 1;
     world->camera.up.z       = 0;
     world->camera.fovy       = 45.0f;
-    world->camera.position.x = 10;
-    world->camera.position.y = 0;
+    world->camera.position.x = -10.0f;
+    world->camera.position.y = 10.0f;
     world->camera.position.z = 0;
     world->camera.projection = CAMERA_PERSPECTIVE;
     world->camera.target.x   = 0;
@@ -43,9 +43,10 @@ entity_id create_ball(ecs_s& ecs, float cx, float cy, float cz, float r) {
     body_s*                   body         = ecs.components.add<body_s>(entity);
     JPH::SphereShape*         sphere_shape = new JPH::SphereShape(r);
     JPH::BodyCreationSettings sphere_settings(sphere_shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Layers::MOVING);
-    sphere_settings.mRestitution = 0.5f;  // A bit of bounce
-    body->interface              = interface;
-    body->id                     = interface->CreateAndAddBody(sphere_settings, JPH::EActivation::Activate);
+    sphere_settings.mRestitution = 0.1f;  // No bounce
+
+    body->interface = interface;
+    body->id        = interface->CreateAndAddBody(sphere_settings, JPH::EActivation::Activate);
 
     (void)ecs.components.add<ball_s>(entity);
 

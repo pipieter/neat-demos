@@ -42,6 +42,8 @@ struct ball_s {
 };
 
 struct rotation_s {
+    float angle_x {0};
+    float angle_z {0};
 };
 
 struct light_s {
