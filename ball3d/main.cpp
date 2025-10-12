@@ -34,7 +34,7 @@ int main() {
         ecs.systems.execute(player_input_system);
         ecs.systems.execute(draw_system);
         ecs.systems.execute(debug_ball_respawn);
-        ecs.systems.execute(debug_wall_rotation_system);
+        ecs.systems.execute(debug_rotation_system);
 
         EndDrawing();
     }

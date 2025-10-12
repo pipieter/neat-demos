@@ -11,12 +11,12 @@ struct world_s;
 struct physics_s;
 struct body_s;
 struct mesh_s;
-struct wall_s;
 struct ball_s;
+struct rotation_s;
 struct light_s;
 
 using entity_id = neat::ecs::entity_id;
-using ecs_s     = neat::ecs::engine<world_s, physics_s, body_s, mesh_s, wall_s, ball_s, light_s>;
+using ecs_s     = neat::ecs::engine<world_s, physics_s, body_s, mesh_s, ball_s, rotation_s, light_s>;
 
 struct world_s {
     ecs_s*   ecs;
@@ -38,10 +38,10 @@ struct mesh_s {
     R3D_Material material;
 };
 
-struct wall_s {
+struct ball_s {
 };
 
-struct ball_s {
+struct rotation_s {
 };
 
 struct light_s {

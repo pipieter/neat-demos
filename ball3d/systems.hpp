@@ -8,4 +8,4 @@ void draw_system(ecs_s& ecs);
 
 // Debug tools for testing
 void debug_ball_respawn(body_s* body, ball_s* ball);
-void debug_wall_rotation_system(body_s* body, wall_s* wall);  
+void debug_rotation_system(body_s* body, rotation_s* rotation);  

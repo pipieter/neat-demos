@@ -58,7 +58,7 @@ void debug_ball_respawn(body_s* body, ball_s*) {
     }
 }
 
-void debug_wall_rotation_system(body_s* body, wall_s*) {
+void debug_rotation_system(body_s* body, rotation_s*) {
     float amount_x = 0.50 * GetFrameTime();
     float amount_z = 0.25 * GetFrameTime();
 

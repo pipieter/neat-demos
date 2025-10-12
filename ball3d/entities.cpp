@@ -69,7 +69,7 @@ entity_id create_maze(ecs_s& ecs, float cx, float cy, float cz, float w, float h
     body->interface = interface;
     body->id        = interface->CreateAndAddBody(box_settings, JPH::EActivation::Activate);
 
-    (void)ecs.components.add<wall_s>(entity);
+    (void)ecs.components.add<rotation_s>(entity);
 
     return entity;
 }
