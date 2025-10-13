@@ -10,9 +10,11 @@ using maze_edge       = std::tuple<maze_node, maze_node>;
 
 struct maze_s {
    private:
-    std::set<maze_node> unvisited_cells;
-    maze_node           get_random_unvisited_cell() const;
-    bool                get_random_unvisited_neighbor(const maze_node& cell, maze_node* neighbor) const;
+    std::set<maze_node>              unvisited_cells;
+    std::set<maze_node>              visited_cells;
+    std::vector<maze_node>           get_cell_neighbors(const maze_node& cell) const;
+    std::vector<maze_node>           get_unvisited_neighbors(const maze_node& cell) const;
+    std::tuple<maze_node, maze_node> get_random_visited_cell_with_unvisited_neighbor() const;
 
    public:
     std::set<maze_edge> edges;

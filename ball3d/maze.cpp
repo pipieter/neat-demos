@@ -1,5 +1,6 @@
 #include "maze.hpp"
 
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 
@@ -47,34 +48,35 @@ maze_s::maze_s(maze_coordinate width, maze_coordinate height, size_t seed) {
         }
     }
 
+    for (maze_coordinate x = 0; x < width - 1; x++) {
+        for (maze_coordinate y = 0; y < height - 1; y++) {
+            visited_cells.insert({x, y});
+        }
+    }
+
     // Generate maze
     maze_node current = start;
     unvisited_cells.erase(start);
+    visited_cells.insert(current);
     while (!unvisited_cells.empty()) {
-        std::cout << unvisited_cells.size() << " remaining..." << std::endl;
-
-        maze_node neighbor;
-        bool      has_unvisited_neighbors = get_random_unvisited_neighbor(current, &neighbor);
-        if (!has_unvisited_neighbors) {
-            current = get_random_unvisited_cell();
+        auto neighbors = get_unvisited_neighbors(current);
+        if (neighbors.empty()) {
+            auto [visited, unvisited] = get_random_visited_cell_with_unvisited_neighbor();
+            remove_edge(visited, unvisited);
+            current = unvisited;
         } else {
+            size_t random_index = std::rand() % neighbors.size();
+            auto   neighbor     = neighbors[random_index];
             remove_edge(current, neighbor);
             current = neighbor;
         }
+
         unvisited_cells.erase(current);
+        visited_cells.insert(current);
     }
 }
 
-maze_node maze_s::get_random_unvisited_cell() const {
-    size_t index = std::rand() % unvisited_cells.size();
-    auto   it    = unvisited_cells.begin();
-    for (size_t i = 0; i < index; i++) {
-        it++;
-    }
-    return *it;
-}
-
-bool maze_s::get_random_unvisited_neighbor(const maze_node& cell, maze_node* neighbor) const {
+std::vector<maze_node> maze_s::get_cell_neighbors(const maze_node& cell) const {
     std::vector<maze_node> neighbors;
     std::vector<maze_node> adjacencies = {
         { 0,  1},
@@ -87,18 +89,39 @@ bool maze_s::get_random_unvisited_neighbor(const maze_node& cell, maze_node* nei
         maze_coordinate x = std::get<0>(cell) + std::get<0>(adjacency);
         maze_coordinate y = std::get<1>(cell) + std::get<1>(adjacency);
         maze_node       n = std::make_tuple(x, y);
-        if (unvisited_cells.contains(n) && x > 0 && y > 0 && x < width && y < height) {
+        if (unvisited_cells.contains(n) && x >= 0 && y >= 0 && x < width && y < height) {
             neighbors.push_back(n);
         }
     }
 
-    if (neighbors.empty()) {
-        return false;
+    return neighbors;
+}
+
+std::vector<maze_node> maze_s::get_unvisited_neighbors(const maze_node& cell) const {
+    std::vector<maze_node> unvisited;
+    for (const auto& neighbor : get_cell_neighbors(cell)) {
+        if (unvisited_cells.contains(neighbor)) {
+            unvisited.push_back(neighbor);
+        }
     }
 
-    size_t index = std::rand() % neighbors.size();
-    *neighbor    = neighbors[index];
-    return true;
+    return unvisited;
+}
+
+std::tuple<maze_node, maze_node> maze_s::get_random_visited_cell_with_unvisited_neighbor() const {
+    std::vector<std::tuple<maze_node, maze_node>> candidates;
+
+    for (const auto& visited : visited_cells) {
+        auto neighbors = get_cell_neighbors(visited);
+        for (const auto& neighbor : neighbors) {
+            if (unvisited_cells.contains(neighbor)) {
+                candidates.push_back(std::make_tuple(visited, neighbor));
+            }
+        }
+    }
+
+    size_t index = std::rand() % candidates.size();
+    return candidates[index];
 }
 
 bool maze_s::has_edge(const maze_node& a, const maze_node& b) const {
