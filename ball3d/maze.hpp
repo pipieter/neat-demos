@@ -12,6 +12,7 @@ struct maze_s {
    private:
     std::set<maze_node>              unvisited_cells;
     std::set<maze_node>              visited_cells;
+    bool                             is_valid_cell(const maze_node& cell) const;
     std::vector<maze_node>           get_cell_neighbors(const maze_node& cell) const;
     std::vector<maze_node>           get_unvisited_neighbors(const maze_node& cell) const;
     std::tuple<maze_node, maze_node> get_random_visited_cell_with_unvisited_neighbor() const;
@@ -21,9 +22,6 @@ struct maze_s {
     maze_coordinate     width;
     maze_coordinate     height;
     size_t              seed;
-
-    maze_node start;
-    maze_node end;
 
     maze_s(maze_coordinate width, maze_coordinate height, size_t seed);
 

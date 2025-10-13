@@ -17,8 +17,8 @@ entity_id create_world(ecs_s& ecs) {
     world->camera.up.y       = 1;
     world->camera.up.z       = 0;
     world->camera.fovy       = 45.0f;
-    world->camera.position.x = -10.f;
-    world->camera.position.y = 4.0f;
+    world->camera.position.x = -0.1f;
+    world->camera.position.y = 15.0f;
     world->camera.position.z = 0;
     world->camera.projection = CAMERA_PERSPECTIVE;
     world->camera.target.x   = 0;
@@ -135,25 +135,21 @@ entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
         auto a = std::get<0>(edge);
         auto b = std::get<1>(edge);
 
-        auto x_a = std::get<0>(a);
-        auto y_a = std::get<1>(a);
-        auto x_b = std::get<0>(b);
-        auto y_b = std::get<1>(b);
+        float x_a = (float)std::get<0>(a);
+        float y_a = (float)std::get<1>(a);
+        float x_b = (float)std::get<0>(b);
+        float y_b = (float)std::get<1>(b);
 
-        float wall_x = (float)std::max(x_a, x_b);
-        float wall_y = (float)std::max(y_a, y_b);
-        float wall_w = thickness;
-        float wall_l = thickness;
-        float wall_h = 0.1;
+        float wall_w = std::max(std::abs(y_a - y_b), 0.0f) + thickness;
+        float wall_l = std::max(std::abs(x_a - x_b), 0.0f) + thickness;
+        float wall_h = 0.2;
 
-        if (is_edge_horizontal(edge)) {
-            wall_w = 1.0;
-        } else {
-            wall_l = 1.0;
-        }
+        float wall_y = wall_h / 2 + thickness;
+        float wall_x = (x_a + x_b - (float)w + 1.0) / 2.0f;
+        float wall_z = (y_a + y_b - (float)h + 1.0) / 2.0f;
 
-        JPH::BoxShapeSettings* wall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {wall_w / 2, wall_h, wall_l / 2});
-        compound_settings.AddShape(JPH::RVec3 {wall_x - (float)w / 2 + 0.5f, wall_h / 2 + thickness, wall_y - (float)h / 2 + 0.5f}, JPH::Quat::sIdentity(), wall_shape);
+        JPH::BoxShapeSettings* wall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {wall_w / 2, wall_h / 2, wall_l / 2});
+        compound_settings.AddShape(JPH::RVec3 {wall_x, wall_y, wall_z}, JPH::Quat::sIdentity(), wall_shape);
     }
 
     std::cout << "is valid: " << compound_settings.Create().IsValid() << std::endl;

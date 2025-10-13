@@ -11,52 +11,26 @@ maze_s::maze_s(maze_coordinate width, maze_coordinate height, size_t seed) {
 
     std::srand(seed);
 
-    this->start = std::make_tuple(0, 0);
-    this->end   = std::make_tuple(width - 1, height - 1);
-
     for (maze_coordinate x = 0; x < width; x++) {
         for (maze_coordinate y = 0; y < height; y++) {
             unvisited_cells.insert(std::make_tuple(x, y));
         }
     }
 
-    // Create outer walls
-    for (maze_coordinate y = 0; y < height - 1; y++) {
-        maze_node n1 = std::make_tuple(0, y + 0);
-        maze_node n2 = std::make_tuple(0, y + 1);
-        maze_node n3 = std::make_tuple(width - 1, y + 0);
-        maze_node n4 = std::make_tuple(width - 1, y + 1);
-        add_edge(n1, n2);
-        add_edge(n3, n4);
-    }
-
-    for (maze_coordinate x = 0; x < width - 1; x++) {
-        maze_node n1 = std::make_tuple(x + 0, 0);
-        maze_node n2 = std::make_tuple(x + 1, 0);
-        maze_node n3 = std::make_tuple(x + 0, height - 1);
-        maze_node n4 = std::make_tuple(x + 1, height - 1);
-        add_edge(n1, n2);
-        add_edge(n3, n4);
-    }
-    for (maze_coordinate x = 0; x < width - 1; x++) {
-        for (maze_coordinate y = 0; y < height - 1; y++) {
+    for (maze_coordinate x = 0; x < width; x++) {
+        for (maze_coordinate y = 0; y < height; y++) {
             maze_node n  = std::make_tuple(x, y);
             maze_node nx = std::make_tuple(x + 1, y);
             maze_node ny = std::make_tuple(x, y + 1);
             add_edge(n, nx);
             add_edge(n, ny);
-        }
-    }
-
-    for (maze_coordinate x = 0; x < width - 1; x++) {
-        for (maze_coordinate y = 0; y < height - 1; y++) {
-            visited_cells.insert({x, y});
+            unvisited_cells.insert(n);
         }
     }
 
     // Generate maze
-    maze_node current = start;
-    unvisited_cells.erase(start);
+    maze_node current = {0, 0};
+    unvisited_cells.erase(current);
     visited_cells.insert(current);
     while (!unvisited_cells.empty()) {
         auto neighbors = get_unvisited_neighbors(current);
@@ -89,7 +63,7 @@ std::vector<maze_node> maze_s::get_cell_neighbors(const maze_node& cell) const {
         maze_coordinate x = std::get<0>(cell) + std::get<0>(adjacency);
         maze_coordinate y = std::get<1>(cell) + std::get<1>(adjacency);
         maze_node       n = std::make_tuple(x, y);
-        if (unvisited_cells.contains(n) && x >= 0 && y >= 0 && x < width && y < height) {
+        if (is_valid_cell(n)) {
             neighbors.push_back(n);
         }
     }
@@ -124,6 +98,11 @@ std::tuple<maze_node, maze_node> maze_s::get_random_visited_cell_with_unvisited_
     return candidates[index];
 }
 
+bool maze_s::is_valid_cell(const maze_node& cell) const {
+    auto [x, y] = cell;
+    return x >= 0 && y >= 0 && x < width && y < height;
+}
+
 bool maze_s::has_edge(const maze_node& a, const maze_node& b) const {
     auto e1 = std::make_tuple(a, b);
     auto e2 = std::make_tuple(b, a);
@@ -131,6 +110,9 @@ bool maze_s::has_edge(const maze_node& a, const maze_node& b) const {
 }
 
 void maze_s::add_edge(const maze_node& a, const maze_node& b) {
+    if (!is_valid_cell(a) || !is_valid_cell(b))
+        return;
+
     auto e = std::make_tuple(a, b);
     edges.insert(e);
 }
