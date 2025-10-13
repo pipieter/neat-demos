@@ -6,6 +6,21 @@
 
 float world_ambient[4] = {0.1f, 0.1f, 0.1f, 1.0f};
 
+void remove_entity(ecs_s& ecs, entity_id entity) {
+    body_s*  body  = ecs.components.get<body_s>(entity);
+    mesh_s*  mesh  = ecs.components.get<mesh_s>(entity);
+    light_s* light = ecs.components.get<light_s>(entity);
+
+    if (body)
+        body->interface->RemoveBody(body->id);
+    if (mesh)
+        R3D_UnloadMesh(&mesh->mesh);
+    if (light)
+        R3D_DestroyLight(light->light);
+
+    ecs.entities.remove(entity);
+}
+
 entity_id create_world(ecs_s& ecs) {
     entity_id entity = ecs.entities.create();
 
