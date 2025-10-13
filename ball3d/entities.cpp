@@ -55,64 +55,6 @@ entity_id create_ball(ecs_s& ecs, float cx, float cy, float cz, float r) {
     return entity;
 }
 
-entity_id create_wall(ecs_s& ecs, float cx, float cy, float cz, float w, float h, float l) {
-    entity_id entity  = ecs.entities.create();
-    auto [_, physics] = ecs.components.first<physics_s>();
-    auto interface    = physics->engine.Interface();
-
-    mesh_s* mesh                   = ecs.components.add<mesh_s>(entity);
-    mesh->mesh                     = R3D_GenMeshCube(w, h, l, true);
-    mesh->material                 = R3D_GetDefaultMaterial();
-    mesh->material.emission.color  = BLUE;
-    mesh->material.emission.energy = 1.0;
-
-    body_s*                   body      = ecs.components.add<body_s>(entity);
-    JPH::BoxShape*            box_shape = new JPH::BoxShape(JPH::Vec3(w / 2, h / 2, l / 2));
-    JPH::BodyCreationSettings box_settings(box_shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::NON_MOVING);
-
-    body->interface = interface;
-    body->id        = interface->CreateAndAddBody(box_settings, JPH::EActivation::Activate);
-
-    return entity;
-}
-
-entity_id create_box(ecs_s& ecs, float cx, float cy, float cz, float w, float h, float l, float thickness) {
-    auto [_, physics] = ecs.components.first<physics_s>();
-    auto interface    = physics->engine.Interface();
-
-    auto    entity = ecs.entities.create();
-    body_s* body   = ecs.components.add<body_s>(entity);
-    mesh_s* mesh   = ecs.components.add<mesh_s>(entity);
-
-    JPH::BoxShapeSettings* floor_shape = new JPH::BoxShapeSettings(JPH::RVec3 {w / 2 + thickness, thickness / 2, l / 2 + thickness});
-    JPH::BoxShapeSettings* twall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {w / 2 + thickness, h / 2 + thickness, thickness / 2});  // Top wall
-    JPH::BoxShapeSettings* bwall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {w / 2 + thickness, h / 2 + thickness, thickness / 2});  // Bottom wall
-    JPH::BoxShapeSettings* lwall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {thickness / 2, h / 2 + thickness, l / 2 + thickness});  // Left wall
-    JPH::BoxShapeSettings* rwall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {thickness / 2, h / 2 + thickness, l / 2 + thickness});  // Right wall
-
-    JPH::MutableCompoundShapeSettings compound_settings;
-    compound_settings.AddShape(JPH::RVec3 {0, -h / 2 - thickness / 2, 0}, JPH::Quat::sIdentity(), floor_shape);
-    compound_settings.AddShape(JPH::RVec3 {0, 0, +l / 2 + thickness / 2}, JPH::Quat::sIdentity(), twall_shape);
-    compound_settings.AddShape(JPH::RVec3 {0, 0, -l / 2 - thickness / 2}, JPH::Quat::sIdentity(), bwall_shape);
-    compound_settings.AddShape(JPH::RVec3 {-w / 2 - thickness / 2, 0, 0}, JPH::Quat::sIdentity(), lwall_shape);
-    compound_settings.AddShape(JPH::RVec3 {+w / 2 + thickness / 2, 0, 0}, JPH::Quat::sIdentity(), rwall_shape);
-
-    JPH::Shape*               shape = compound_settings.Create().Get();
-    JPH::BodyCreationSettings body_creation(shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::NON_MOVING);
-
-    body->interface = interface;
-    body->id        = interface->CreateAndAddBody(body_creation, JPH::EActivation::Activate);
-
-    mesh->mesh                     = GenMeshFromShape(shape, true);
-    mesh->material                 = R3D_GetDefaultMaterial();
-    mesh->material.emission.color  = BLUE;
-    mesh->material.emission.energy = 1.0;
-
-    (void)ecs.components.add<rotation_s>(entity);
-
-    return entity;
-}
-
 entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
     const float thickness = 0.2;
 
