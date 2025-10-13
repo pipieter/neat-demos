@@ -185,7 +185,7 @@ entity_id create_light(ecs_s& ecs, float x, float y, float z) {
     light->light = R3D_CreateLight(R3D_LIGHT_OMNI);
     R3D_SetLightActive(light->light, true);
     R3D_SetLightPosition(light->light, {x, y, z});
-    R3D_EnableShadow(light->light, 4096);
+    R3D_EnableShadow(light->light, 1024);
 
     return entity;
 }
