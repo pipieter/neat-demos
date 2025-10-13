@@ -47,8 +47,8 @@ void draw_system(ecs_s& ecs) {
     R3D_End();
 
     const char* fps = TextFormat("FPS: %.1f", 1.0f / GetFrameTime());
-    DrawText(fps, 10, 10, 20, BLACK);
-    DrawText("Press '1' to enable logging, press '2' to disable it.", 10, 35, 20, BLACK);
+    DrawText(fps, 10, 10, 20, LIGHTGRAY);
+    DrawText("Rotate the platform using the WASD\nkeys. You can move the camera up\nand down by pressing the space and\nshift keys. The ball can be reset with\nthe R key.", 10, 35, 20, LIGHTGRAY);
 }
 
 void ball_reset_system(body_s* body, ball_s*) {
