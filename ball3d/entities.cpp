@@ -114,7 +114,7 @@ entity_id create_box(ecs_s& ecs, float cx, float cy, float cz, float w, float h,
 }
 
 entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
-    const float thickness = 0.1;
+    const float thickness = 0.2;
 
     auto [_, physics] = ecs.components.first<physics_s>();
     auto interface    = physics->engine.Interface();
@@ -127,10 +127,21 @@ entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
     JPH::MutableCompoundShapeSettings compound_settings;
 
     // Add floor
-    JPH::BoxShapeSettings* floor_shape = new JPH::BoxShapeSettings(JPH::RVec3 {(float)w / 2, thickness, (float)h / 2});
+    JPH::BoxShapeSettings* floor_shape = new JPH::BoxShapeSettings(JPH::RVec3 {(float)w / 2, thickness / 2, (float)h / 2});
     compound_settings.AddShape(JPH::RVec3 {0.0f, 0.0f, 0.0f}, JPH::Quat::sIdentity(), floor_shape);
 
-    // Add walls
+    // outer walls
+    float wall_h = 0.4;
+    float wall_y = wall_h / 2 + thickness / 2;
+
+    JPH::BoxShapeSettings* lr_wall_shape  = new JPH::BoxShapeSettings(JPH::RVec3 {thickness / 2, wall_h / 2, (float)h / 2 + thickness / 2});  // Left/right wall
+    JPH::BoxShapeSettings* tb_bwall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {(float)w / 2 + thickness / 2, wall_h / 2, thickness / 2});  // Top/bottom wall
+    compound_settings.AddShape(JPH::RVec3 {(float)-w / 2, wall_y, 0.0f}, JPH::Quat::sIdentity(), lr_wall_shape);
+    compound_settings.AddShape(JPH::RVec3 {(float)+w / 2, wall_y, 0.0f}, JPH::Quat::sIdentity(), lr_wall_shape);
+    compound_settings.AddShape(JPH::RVec3 {0.0f, wall_y, (float)-h / 2}, JPH::Quat::sIdentity(), tb_bwall_shape);
+    compound_settings.AddShape(JPH::RVec3 {0.0f, wall_y, (float)+h / 2}, JPH::Quat::sIdentity(), tb_bwall_shape);
+
+    // Add maze walls
     for (const auto& edge : maze.edges) {
         auto a = std::get<0>(edge);
         auto b = std::get<1>(edge);
@@ -142,9 +153,7 @@ entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
 
         float wall_w = std::max(std::abs(y_a - y_b), 0.0f) + thickness;
         float wall_l = std::max(std::abs(x_a - x_b), 0.0f) + thickness;
-        float wall_h = 0.2;
 
-        float wall_y = wall_h / 2 + thickness;
         float wall_x = (x_a + x_b - (float)w + 1.0) / 2.0f;
         float wall_z = (y_a + y_b - (float)h + 1.0) / 2.0f;
 
