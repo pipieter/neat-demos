@@ -29,7 +29,6 @@ struct physics_s {
 };
 
 struct body_s {
-    // TODO this needs to be manually deleted from the physics engine
     JPH::BodyInterface* interface;
     JPH::BodyID         id;
 };

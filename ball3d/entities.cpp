@@ -139,7 +139,7 @@ entity_id create_light(ecs_s& ecs, float x, float y, float z) {
     entity_id entity = ecs.entities.create();
 
     light_s* light = ecs.components.add<light_s>(entity);
-    // TODO The light needs to be manually destroyed using R3D_DestroyLight
+
     light->light = R3D_CreateLight(R3D_LIGHT_OMNI);
     R3D_SetLightActive(light->light, true);
     R3D_SetLightPosition(light->light, {x, y, z});
