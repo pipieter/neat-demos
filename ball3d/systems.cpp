@@ -98,14 +98,3 @@ void camera_move_system(world_s* world) {
     world->camera.position.y = distance * std::sin(world->position);
     world->camera.position.x = distance * std::cos(world->position);
 }
-
-void log_enable_system(ecs_s&) {
-    if (IsKeyPressed(KEY_ONE)) {
-        SetTraceLogLevel(LOG_DEBUG);
-        JPH_SetDebugStatus(true);
-    }
-    if (IsKeyPressed(KEY_TWO)) {
-        SetTraceLogLevel(LOG_FATAL);
-        JPH_SetDebugStatus(false);
-    }
-}

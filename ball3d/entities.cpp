@@ -71,7 +71,7 @@ entity_id create_ball(ecs_s& ecs, float cx, float cy, float cz, float r) {
     return entity;
 }
 
-entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
+entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h, size_t seed) {
     const float thickness = 0.2;
 
     auto [_, physics] = ecs.components.first<physics_s>();
@@ -80,7 +80,7 @@ entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
     auto    entity = ecs.entities.create();
     body_s* body   = ecs.components.add<body_s>(entity);
     mesh_s* mesh   = ecs.components.add<mesh_s>(entity);
-    maze_s  maze   = maze_s(w, h, 999);
+    maze_s  maze   = maze_s(w, h, seed);
 
     JPH::MutableCompoundShapeSettings compound_settings;
 
