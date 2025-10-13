@@ -161,7 +161,6 @@ entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
         compound_settings.AddShape(JPH::RVec3 {wall_x, wall_y, wall_z}, JPH::Quat::sIdentity(), wall_shape);
     }
 
-    std::cout << "is valid: " << compound_settings.Create().IsValid() << std::endl;
     JPH::Shape*               shape = compound_settings.Create().Get();
     JPH::BodyCreationSettings body_creation(shape, JPH::RVec3 {0, 0, 0}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::NON_MOVING);
 
