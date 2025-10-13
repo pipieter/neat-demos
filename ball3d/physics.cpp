@@ -1,5 +1,7 @@
 #include "physics.hpp"
 
+#include <r3d.h>
+
 #include <cstdarg>
 
 // Note: this file is heavily based on the Jolt Physics Hello World implementation, due to the simplicities of that program and this game
@@ -154,4 +156,99 @@ const JPH::BodyLockInterface* PhysicsEngine::LockInterface() const {
 
 std::shared_ptr<JPH::PhysicsSystem> PhysicsEngine::PhysicsSystem() {
     return _physics_system;
+}
+
+struct TransformedShapeCollectorImpl : public JPH::TransformedShapeCollector {
+    std::vector<JPH::TransformedShape> mShapes;
+
+    virtual void AddHit(const JPH::TransformedShape& ts) override {
+        mShapes.push_back(ts);
+    }
+};
+
+R3D_Mesh GenMeshFromShape(const JPH::Shape* shape, bool upload) {
+    // Collect leaves
+    JPH::SubShapeIDCreator        inSubShapeIDCreator;
+    TransformedShapeCollectorImpl collector;
+    JPH::ShapeFilter              inShapeFilter;
+
+    // Get triangles
+    JPH::Shape::GetTrianglesContext ctx;
+    std::vector<JPH::Float3>        triangle_vertices;
+    JPH::AABox                      box = shape->GetLocalBounds();
+    shape->CollectTransformedShapes(box, {0, 0, 0}, JPH::Quat::sIdentity(), {1, 1, 1}, inSubShapeIDCreator, collector, inShapeFilter);
+
+    for (const auto& ts : collector.mShapes) {
+        auto leaf = ts.mShape;
+        leaf->GetTrianglesStart(ctx, box, ts.mShapePositionCOM, ts.mShapeRotation, (JPH::RVec3)ts.mShapeScale);
+
+        const int   max_per_call = 100;
+        JPH::Float3 next_triangles[3 * max_per_call];
+        while (true) {
+            int triangles_gotten = leaf->GetTrianglesNext(ctx, max_per_call, next_triangles);
+            for (int i = 0; i < 3 * triangles_gotten; i++) {
+                triangle_vertices.push_back(next_triangles[i]);
+            }
+            if (triangles_gotten == 0) {
+                break;
+            }
+        }
+    }
+
+    // After collecting triangles into std::vector<Float3> tris (length = nTris*3)
+    size_t                    totalVerts = triangle_vertices.size();
+    std::vector<R3D_Vertex>   vertices(totalVerts);
+    std::vector<unsigned int> indices(totalVerts);
+
+    for (size_t i = 0; i < totalVerts / 3; ++i) {
+        JPH::Float3 va = triangle_vertices[i * 3 + 0];
+        JPH::Float3 vb = triangle_vertices[i * 3 + 1];
+        JPH::Float3 vc = triangle_vertices[i * 3 + 2];
+
+        JPH::RVec3 a = JPH::RVec3 {va.x, va.y, va.z};
+        JPH::RVec3 b = JPH::RVec3 {vb.x, vb.y, vb.z};
+        JPH::RVec3 c = JPH::RVec3 {vc.x, vc.y, vc.z};
+
+        // Texcoords and tangents are ignored, seeing how textures won't be used in this demo
+        Vector4 tangent {1, 0, 0, 1};
+
+        // https://wikis.khronos.org/opengl/Calculating_a_Surface_Normal
+        JPH::RVec3 vnormal = (b - a).Cross(c - a);
+        Vector3    normal  = {vnormal.GetX(), vnormal.GetY(), vnormal.GetZ()};
+
+        // White color
+        Vector4 color {1, 1, 1, 1};
+
+        // clang-format off
+        vertices[i * 3 + 0] = R3D_Vertex {(Vector3 {va.x, va.y, va.z}), Vector2({0, 0}), normal, color, tangent, {0,0,0,0}, {0,0,0,0}};
+        vertices[i * 3 + 1] = R3D_Vertex {(Vector3 {vb.x, vb.y, vb.z}), Vector2({0, 1}), normal, color, tangent, {0,0,0,0}, {0,0,0,0}};
+        vertices[i * 3 + 2] = R3D_Vertex {(Vector3 {vc.x, vc.y, vc.z}), Vector2({1, 0}), normal, color, tangent, {0,0,0,0}, {0,0,0,0}};
+        // clang-format on
+
+        // indices
+        indices[i * 3 + 0] = i * 3 + 0;
+        indices[i * 3 + 1] = i * 3 + 1;
+        indices[i * 3 + 2] = i * 3 + 2;
+    }
+
+    // Create raylib Mesh
+    R3D_Mesh mesh {};
+    mesh.vertexCount = vertices.size();
+    mesh.indexCount  = indices.size();
+
+    mesh.vertices = (R3D_Vertex*)RL_MALLOC(vertices.size() * sizeof(R3D_Vertex));
+    mesh.indices  = (unsigned int*)RL_MALLOC(indices.size() * sizeof(unsigned int));
+
+    memcpy(mesh.vertices, vertices.data(), sizeof(R3D_Vertex) * vertices.size());
+    memcpy(mesh.indices, indices.data(), sizeof(unsigned int) * indices.size());
+
+    mesh.aabb.min = Vector3 {box.mMin.GetX(), box.mMin.GetY(), box.mMin.GetZ()};
+    mesh.aabb.max = Vector3 {box.mMax.GetX(), box.mMax.GetY(), box.mMax.GetZ()};
+
+    if (upload)
+        R3D_UploadMesh(&mesh, false);
+
+    std::cout << "Created a mesh with " << mesh.vertexCount << " vertices and " << mesh.indexCount << " indices. " << mesh.vertices << " " << mesh.indices << std::endl;
+
+    return mesh;
 }

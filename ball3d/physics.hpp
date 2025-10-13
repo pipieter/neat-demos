@@ -5,10 +5,12 @@
 // Jolt includes
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
+#include <Jolt/Core/STLAllocator.h>
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Physics/Collision/Shape/MutableCompoundShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Constraints/FixedConstraint.h>
 #include <Jolt/Physics/PhysicsSettings.h>
@@ -95,3 +97,5 @@ class PhysicsEngine {
     const JPH::BodyLockInterface*       LockInterface() const;
     std::shared_ptr<JPH::PhysicsSystem> PhysicsSystem();
 };
+
+struct R3D_Mesh GenMeshFromShape(const JPH::Shape* shape, bool upload);

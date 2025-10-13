@@ -15,7 +15,7 @@ entity_id create_world(ecs_s& ecs) {
     world->camera.up.y       = 1;
     world->camera.up.z       = 0;
     world->camera.fovy       = 45.0f;
-    world->camera.position.x = -10.0f;
+    world->camera.position.x = -5.0f;
     world->camera.position.y = 10.0f;
     world->camera.position.z = 0;
     world->camera.projection = CAMERA_PERSPECTIVE;
@@ -74,46 +74,41 @@ entity_id create_wall(ecs_s& ecs, float cx, float cy, float cz, float w, float h
     return entity;
 }
 
-void constrain_body(JPH::PhysicsSystem* physics_system, const JPH::BodyLockInterface* bli, const JPH::BodyID& body1_id, const JPH::BodyID& body2_id) {
-    JPH::FixedConstraintSettings settings;
-    settings.mAutoDetectPoint = true;  // attach at current relative pose
-    settings.mSpace           = JPH::EConstraintSpace::WorldSpace;
-    settings.mEnabled         = true;
-
-    JPH::Body* body1 = bli->TryGetBody(body1_id);
-    JPH::Body* body2 = bli->TryGetBody(body2_id);
-    body2->SetMotionType(JPH::EMotionType::Dynamic);
-    JPH::TwoBodyConstraint* constraint = settings.Create(*body1, *body2);
-    constraint->SetEnabled(true);
-
-    physics_system->AddConstraint(constraint);
-}
-
 entity_id create_box(ecs_s& ecs, float cx, float cy, float cz, float w, float h, float l, float thickness) {
-    auto [_, physics]   = ecs.components.first<physics_s>();
-    auto lock_interface = physics->engine.LockInterface();
-    auto physics_system = physics->engine.PhysicsSystem();
+    auto [_, physics] = ecs.components.first<physics_s>();
+    auto interface    = physics->engine.Interface();
 
-    entity_id floor = create_wall(ecs, cx, cy - h / 2 - thickness / 2, cz, w + 2 * thickness, thickness, l + 2 * thickness);
-    entity_id wall1 = create_wall(ecs, cx, cy, cz + l / 2 + thickness / 2, w + 2 * thickness, h + 2 * thickness, thickness);  // Top wall
-    entity_id wall2 = create_wall(ecs, cx, cy, cz - l / 2 - thickness / 2, w + 2 * thickness, h + 2 * thickness, thickness);  // Bottom wall
-    entity_id wall3 = create_wall(ecs, cx - w / 2 - thickness / 2, cy, cz, thickness, h + 2 * thickness, l + 2 * thickness);  // Left wall
-    entity_id wall4 = create_wall(ecs, cx + w / 2 + thickness / 2, cy, cz, thickness, h + 2 * thickness, l + 2 * thickness);  // Right wall
+    auto    entity = ecs.entities.create();
+    body_s* body   = ecs.components.add<body_s>(entity);
+    mesh_s* mesh   = ecs.components.add<mesh_s>(entity);
 
-    body_s* floor_body = ecs.components.get<body_s>(floor);
-    body_s* wall1_body = ecs.components.get<body_s>(wall1);
-    body_s* wall2_body = ecs.components.get<body_s>(wall2);
-    body_s* wall3_body = ecs.components.get<body_s>(wall3);
-    body_s* wall4_body = ecs.components.get<body_s>(wall4);
+    JPH::BoxShapeSettings* floor_shape = new JPH::BoxShapeSettings(JPH::RVec3 {w / 2 + thickness, thickness / 2, l / 2 + thickness});
+    JPH::BoxShapeSettings* twall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {w / 2 + thickness, h / 2 + thickness, thickness / 2});  // Top wall
+    JPH::BoxShapeSettings* bwall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {w / 2 + thickness, h / 2 + thickness, thickness / 2});  // Bottom wall
+    JPH::BoxShapeSettings* lwall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {thickness / 2, h / 2 + thickness, l / 2 + thickness});  // Left wall
+    JPH::BoxShapeSettings* rwall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {thickness / 2, h / 2 + thickness, l / 2 + thickness});  // Right wall
 
-    constrain_body(physics_system.get(), lock_interface, floor_body->id, wall1_body->id);
-    constrain_body(physics_system.get(), lock_interface, floor_body->id, wall2_body->id);
-    constrain_body(physics_system.get(), lock_interface, floor_body->id, wall3_body->id);
-    constrain_body(physics_system.get(), lock_interface, floor_body->id, wall4_body->id);
+    JPH::MutableCompoundShapeSettings compound_settings;
+    compound_settings.AddShape(JPH::RVec3 {0, -h / 2 - thickness / 2, 0}, JPH::Quat::sIdentity(), floor_shape);
+    compound_settings.AddShape(JPH::RVec3 {0, 0, +l / 2 + thickness / 2}, JPH::Quat::sIdentity(), twall_shape);
+    compound_settings.AddShape(JPH::RVec3 {0, 0, -l / 2 - thickness / 2}, JPH::Quat::sIdentity(), bwall_shape);
+    compound_settings.AddShape(JPH::RVec3 {-w / 2 - thickness / 2, 0, 0}, JPH::Quat::sIdentity(), lwall_shape);
+    compound_settings.AddShape(JPH::RVec3 {+w / 2 + thickness / 2, 0, 0}, JPH::Quat::sIdentity(), rwall_shape);
 
-    (void)ecs.components.add<rotation_s>(floor);
+    JPH::Shape*               shape = compound_settings.Create().Get();
+    JPH::BodyCreationSettings body_creation(shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::NON_MOVING);
 
-    return floor;
+    body->interface = interface;
+    body->id        = interface->CreateAndAddBody(body_creation, JPH::EActivation::Activate);
+
+    mesh->mesh                     = GenMeshFromShape(shape, true);
+    mesh->material                 = R3D_GetDefaultMaterial();
+    mesh->material.emission.color  = BLUE;
+    mesh->material.emission.energy = 1.0;
+
+    (void)ecs.components.add<rotation_s>(entity);
+
+    return entity;
 }
 
 entity_id create_light(ecs_s& ecs, float x, float y, float z) {
