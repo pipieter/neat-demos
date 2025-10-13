@@ -166,15 +166,16 @@ struct TransformedShapeCollectorImpl : public JPH::TransformedShapeCollector {
     }
 };
 
-R3D_Mesh GenMeshFromShape(const JPH::Shape* shape, bool upload) {
+/** Returns a vector with N*3 elements, where N is the amount of triangles. The vertices of each triangle are grouped sequentially. */
+std::vector<JPH::Float3> GetTrianglesFromShape(const JPH::Shape* shape) {
+    std::vector<JPH::Float3> triangle_vertices;
+
     // Collect leaves
     JPH::SubShapeIDCreator        inSubShapeIDCreator;
     TransformedShapeCollectorImpl collector;
     JPH::ShapeFilter              inShapeFilter;
 
-    // Get triangles
     JPH::Shape::GetTrianglesContext ctx;
-    std::vector<JPH::Float3>        triangle_vertices;
     JPH::AABox                      box = shape->GetLocalBounds();
     shape->CollectTransformedShapes(box, {0, 0, 0}, JPH::Quat::sIdentity(), {1, 1, 1}, inSubShapeIDCreator, collector, inShapeFilter);
 
@@ -195,12 +196,16 @@ R3D_Mesh GenMeshFromShape(const JPH::Shape* shape, bool upload) {
         }
     }
 
-    // After collecting triangles into std::vector<Float3> tris (length = nTris*3)
-    size_t                    totalVerts = triangle_vertices.size();
-    std::vector<R3D_Vertex>   vertices(totalVerts);
-    std::vector<unsigned int> indices(totalVerts);
+    return triangle_vertices;
+}
 
-    for (size_t i = 0; i < totalVerts / 3; ++i) {
+R3D_Mesh GenMeshFromShape(const JPH::Shape* shape, bool upload) {
+    JPH::AABox                box               = shape->GetLocalBounds();
+    std::vector<JPH::Float3>  triangle_vertices = GetTrianglesFromShape(shape);
+    std::vector<R3D_Vertex>   vertices(triangle_vertices.size());
+    std::vector<unsigned int> indices(triangle_vertices.size());
+
+    for (size_t i = 0; i < triangle_vertices.size() / 3; ++i) {
         JPH::Float3 va = triangle_vertices[i * 3 + 0];
         JPH::Float3 vb = triangle_vertices[i * 3 + 1];
         JPH::Float3 vc = triangle_vertices[i * 3 + 2];
@@ -247,8 +252,6 @@ R3D_Mesh GenMeshFromShape(const JPH::Shape* shape, bool upload) {
 
     if (upload)
         R3D_UploadMesh(&mesh, false);
-
-    std::cout << "Created a mesh with " << mesh.vertexCount << " vertices and " << mesh.indexCount << " indices. " << mesh.vertices << " " << mesh.indices << std::endl;
 
     return mesh;
 }
