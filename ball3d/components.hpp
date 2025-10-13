@@ -21,6 +21,7 @@ using ecs_s     = neat::ecs::engine<world_s, physics_s, body_s, mesh_s, ball_s, 
 struct world_s {
     ecs_s*   ecs;
     Camera3D camera;
+    float    position;
 };
 
 struct physics_s {

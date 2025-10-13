@@ -9,16 +9,17 @@ float world_ambient[4] = {0.1f, 0.1f, 0.1f, 1.0f};
 entity_id create_world(ecs_s& ecs) {
     entity_id entity = ecs.entities.create();
 
-    world_s* world = ecs.components.add<world_s>(entity);
-    world->ecs     = &ecs;
+    world_s* world  = ecs.components.add<world_s>(entity);
+    world->ecs      = &ecs;
+    world->position = 0.1f;
 
     // Create camera
     world->camera.up.x       = 0;
     world->camera.up.y       = 1;
     world->camera.up.z       = 0;
     world->camera.fovy       = 45.0f;
-    world->camera.position.x = -0.1f;
-    world->camera.position.y = 15.0f;
+    world->camera.position.x = -0.01f;
+    world->camera.position.y = +12.f;
     world->camera.position.z = 0;
     world->camera.projection = CAMERA_PERSPECTIVE;
     world->camera.target.x   = 0;

@@ -65,13 +65,13 @@ void platform_rotation_system(body_s* body, rotation_s* rotation) {
     float max_angle = 3.141592 / 8.0;
 
     if (IsKeyDown(KEY_W))
-        rotation->angle_z -= velocity;
-    if (IsKeyDown(KEY_A))
-        rotation->angle_x -= velocity;
-    if (IsKeyDown(KEY_S))
         rotation->angle_z += velocity;
-    if (IsKeyDown(KEY_D))
+    if (IsKeyDown(KEY_A))
         rotation->angle_x += velocity;
+    if (IsKeyDown(KEY_S))
+        rotation->angle_z -= velocity;
+    if (IsKeyDown(KEY_D))
+        rotation->angle_x -= velocity;
 
     rotation->angle_x = std::clamp(rotation->angle_x, -max_angle, max_angle);
     rotation->angle_z = std::clamp(rotation->angle_z, -max_angle, max_angle);
@@ -80,6 +80,23 @@ void platform_rotation_system(body_s* body, rotation_s* rotation) {
     auto position      = body->interface->GetPosition(body->id);
 
     body->interface->MoveKinematic(body->id, position, rotation_quat, dt);
+}
+
+void camera_move_system(world_s* world) {
+    const float min_position = -0.2;
+    const float max_position = 3.141592 / 2.0 - 0.01;
+    const float distance     = 12.0f;
+
+    float speed = 0.5 * GetFrameTime();
+
+    if (IsKeyDown(KEY_SPACE))
+        world->position += speed;
+    if (IsKeyDown(KEY_LEFT_SHIFT))
+        world->position -= speed;
+
+    world->position          = std::clamp(world->position, min_position, max_position);
+    world->camera.position.y = distance * std::sin(world->position);
+    world->camera.position.x = distance * std::cos(world->position);
 }
 
 void log_enable_system(ecs_s&) {

@@ -23,11 +23,12 @@ int main() {
     ecs_s ecs;
     (void)create_world(ecs);
     (void)create_ball(ecs, 0.0, 3.0, 0.0, 0.2);
-    (void)create_maze(ecs, 9, 17);
+    (void)create_maze(ecs, 9, 9);
     (void)create_light(ecs, +5.0, 2.0, +5.0);
     (void)create_light(ecs, +5.0, 2.0, -5.0);
     (void)create_light(ecs, -5.0, 2.0, +5.0);
     (void)create_light(ecs, -5.0, 2.0, -5.0);
+    (void)create_light(ecs, 0.0, -10.0, 0.0);
 
     auto [_, physics] = ecs.components.first<physics_s>();
     physics->engine.Ready();
@@ -39,6 +40,7 @@ int main() {
         ecs.systems.execute(log_enable_system);
         ecs.systems.execute(physics_system);
         ecs.systems.execute(ball_reset_system);
+        ecs.systems.execute(camera_move_system);
         ecs.systems.execute(platform_rotation_system);
         ecs.systems.execute(draw_system);
 
