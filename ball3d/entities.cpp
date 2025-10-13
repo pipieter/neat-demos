@@ -67,9 +67,6 @@ entity_id create_wall(ecs_s& ecs, float cx, float cy, float cz, float w, float h
     body_s*                   body      = ecs.components.add<body_s>(entity);
     JPH::BoxShape*            box_shape = new JPH::BoxShape(JPH::Vec3(w / 2, h / 2, l / 2));
     JPH::BodyCreationSettings box_settings(box_shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::NON_MOVING);
-    // Prevents the wall from rotating when attached to a moving platform. This is somewhat hacky, but
-    // should be fine for the purposes of this demo.
-    box_settings.mInertiaMultiplier = 1e10;
 
     body->interface = interface;
     body->id        = interface->CreateAndAddBody(box_settings, JPH::EActivation::Activate);
