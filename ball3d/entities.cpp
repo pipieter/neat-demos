@@ -4,7 +4,7 @@
 
 #include "maze.hpp"
 
-float world_ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
+float world_ambient[4] = {0.1f, 0.1f, 0.1f, 1.0f};
 
 entity_id create_world(ecs_s& ecs) {
     entity_id entity = ecs.entities.create();
@@ -39,13 +39,13 @@ entity_id create_ball(ecs_s& ecs, float cx, float cy, float cz, float r) {
     mesh_s* mesh                   = ecs.components.add<mesh_s>(entity);
     mesh->mesh                     = R3D_GenMeshSphere(r, 32, 32, true);
     mesh->material                 = R3D_GetDefaultMaterial();
-    mesh->material.emission.color  = RED;
-    mesh->material.emission.energy = 1.0;
+    mesh->material.emission.color  = {255, 0, 0, 255};
+    mesh->material.emission.energy = 0.75;
 
     body_s*                   body         = ecs.components.add<body_s>(entity);
     JPH::SphereShape*         sphere_shape = new JPH::SphereShape(r);
     JPH::BodyCreationSettings sphere_settings(sphere_shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Layers::MOVING);
-    sphere_settings.mRestitution = 0.1f;  // No bounce
+    sphere_settings.mRestitution = 0.0f;  // No bounce
 
     body->interface = interface;
     body->id        = interface->CreateAndAddBody(sphere_settings, JPH::EActivation::Activate);
@@ -169,8 +169,8 @@ entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
 
     mesh->mesh                     = GenMeshFromShape(shape, true);
     mesh->material                 = R3D_GetDefaultMaterial();
-    mesh->material.emission.color  = BLUE;
-    mesh->material.emission.energy = 1.0;
+    mesh->material.emission.color  = DARKBROWN;
+    mesh->material.emission.energy = 0.75;
 
     (void)ecs.components.add<rotation_s>(entity);
 
@@ -186,6 +186,8 @@ entity_id create_light(ecs_s& ecs, float x, float y, float z) {
     R3D_SetLightActive(light->light, true);
     R3D_SetLightPosition(light->light, {x, y, z});
     R3D_EnableShadow(light->light, 1024);
+    R3D_SetLightEnergy(light->light, 1.0);
+    R3D_SetLightColor(light->light, LIGHTGRAY);
 
     return entity;
 }

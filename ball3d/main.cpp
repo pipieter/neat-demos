@@ -24,10 +24,10 @@ int main() {
     (void)create_world(ecs);
     (void)create_ball(ecs, 0.0, 3.0, 0.0, 0.2);
     (void)create_maze(ecs, 9, 17);
-    (void)create_light(ecs, +5.0, 1.0, +5.0);
-    (void)create_light(ecs, +5.0, 1.0, -5.0);
-    (void)create_light(ecs, -5.0, 1.0, +5.0);
-    (void)create_light(ecs, -5.0, 1.0, -5.0);
+    (void)create_light(ecs, +5.0, 2.0, +5.0);
+    (void)create_light(ecs, +5.0, 2.0, -5.0);
+    (void)create_light(ecs, -5.0, 2.0, +5.0);
+    (void)create_light(ecs, -5.0, 2.0, -5.0);
 
     auto [_, physics] = ecs.components.first<physics_s>();
     physics->engine.Ready();

@@ -37,7 +37,7 @@ void draw_body(body_s* body, mesh_s* mesh) {
 void draw_system(ecs_s& ecs) {
     auto [_, world] = ecs.components.first<world_s>();
 
-    R3D_SetBackgroundColor(LIGHTGRAY);
+    R3D_SetBackgroundColor({4, 6, 8, 255});
     R3D_Begin(world->camera);
 
     for (const auto& [body, mesh] : ecs.iterate_components<body_s, mesh_s>()) {
