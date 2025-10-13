@@ -1,0 +1,132 @@
+#include "maze.hpp"
+
+#include <cstdlib>
+#include <iostream>
+
+maze_s::maze_s(maze_coordinate width, maze_coordinate height, size_t seed) {
+    this->width  = width;
+    this->height = height;
+    this->seed   = seed;
+
+    std::srand(seed);
+
+    this->start = std::make_tuple(0, 0);
+    this->end   = std::make_tuple(width - 1, height - 1);
+
+    for (maze_coordinate x = 0; x < width; x++) {
+        for (maze_coordinate y = 0; y < height; y++) {
+            unvisited_cells.insert(std::make_tuple(x, y));
+        }
+    }
+
+    // Create outer walls
+    for (maze_coordinate y = 0; y < height - 1; y++) {
+        maze_node n1 = std::make_tuple(0, y + 0);
+        maze_node n2 = std::make_tuple(0, y + 1);
+        maze_node n3 = std::make_tuple(width - 1, y + 0);
+        maze_node n4 = std::make_tuple(width - 1, y + 1);
+        add_edge(n1, n2);
+        add_edge(n3, n4);
+    }
+
+    for (maze_coordinate x = 0; x < width - 1; x++) {
+        maze_node n1 = std::make_tuple(x + 0, 0);
+        maze_node n2 = std::make_tuple(x + 1, 0);
+        maze_node n3 = std::make_tuple(x + 0, height - 1);
+        maze_node n4 = std::make_tuple(x + 1, height - 1);
+        add_edge(n1, n2);
+        add_edge(n3, n4);
+    }
+    for (maze_coordinate x = 0; x < width - 1; x++) {
+        for (maze_coordinate y = 0; y < height - 1; y++) {
+            maze_node n  = std::make_tuple(x, y);
+            maze_node nx = std::make_tuple(x + 1, y);
+            maze_node ny = std::make_tuple(x, y + 1);
+            add_edge(n, nx);
+            add_edge(n, ny);
+        }
+    }
+
+    // Generate maze
+    maze_node current = start;
+    unvisited_cells.erase(start);
+    while (!unvisited_cells.empty()) {
+        std::cout << unvisited_cells.size() << " remaining..." << std::endl;
+
+        maze_node neighbor;
+        bool      has_unvisited_neighbors = get_random_unvisited_neighbor(current, &neighbor);
+        if (!has_unvisited_neighbors) {
+            current = get_random_unvisited_cell();
+        } else {
+            remove_edge(current, neighbor);
+            current = neighbor;
+        }
+        unvisited_cells.erase(current);
+    }
+}
+
+maze_node maze_s::get_random_unvisited_cell() const {
+    size_t index = std::rand() % unvisited_cells.size();
+    auto   it    = unvisited_cells.begin();
+    for (size_t i = 0; i < index; i++) {
+        it++;
+    }
+    return *it;
+}
+
+bool maze_s::get_random_unvisited_neighbor(const maze_node& cell, maze_node* neighbor) const {
+    std::vector<maze_node> neighbors;
+    std::vector<maze_node> adjacencies = {
+        { 0,  1},
+        { 0, -1},
+        { 1,  0},
+        {-1,  0}
+    };
+
+    for (const auto& adjacency : adjacencies) {
+        maze_coordinate x = std::get<0>(cell) + std::get<0>(adjacency);
+        maze_coordinate y = std::get<1>(cell) + std::get<1>(adjacency);
+        maze_node       n = std::make_tuple(x, y);
+        if (unvisited_cells.contains(n) && x > 0 && y > 0 && x < width && y < height) {
+            neighbors.push_back(n);
+        }
+    }
+
+    if (neighbors.empty()) {
+        return false;
+    }
+
+    size_t index = std::rand() % neighbors.size();
+    *neighbor    = neighbors[index];
+    return true;
+}
+
+bool maze_s::has_edge(const maze_node& a, const maze_node& b) const {
+    auto e1 = std::make_tuple(a, b);
+    auto e2 = std::make_tuple(b, a);
+    return edges.contains(e1) || edges.contains(e2);
+}
+
+void maze_s::add_edge(const maze_node& a, const maze_node& b) {
+    auto e = std::make_tuple(a, b);
+    edges.insert(e);
+}
+
+void maze_s::remove_edge(const maze_node& a, const maze_node& b) {
+    auto e1 = std::make_tuple(a, b);
+    auto e2 = std::make_tuple(b, a);
+    edges.erase(e1);
+    edges.erase(e2);
+}
+
+bool is_edge_horizontal(const maze_edge& edge) {
+    auto n1 = std::get<0>(edge);
+    auto n2 = std::get<1>(edge);
+
+    auto x1 = std::get<0>(n1);
+    auto y1 = std::get<1>(n1);
+    auto x2 = std::get<0>(n2);
+    auto y2 = std::get<1>(n2);
+
+    return x1 == x2 && y1 != y2;
+}

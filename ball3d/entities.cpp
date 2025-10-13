@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include "maze.hpp"
+
 float world_ambient[4] = {0.4f, 0.4f, 0.4f, 1.0f};
 
 entity_id create_world(ecs_s& ecs) {
@@ -15,8 +17,8 @@ entity_id create_world(ecs_s& ecs) {
     world->camera.up.y       = 1;
     world->camera.up.z       = 0;
     world->camera.fovy       = 45.0f;
-    world->camera.position.x = -5.0f;
-    world->camera.position.y = 10.0f;
+    world->camera.position.x = -10.f;
+    world->camera.position.y = 4.0f;
     world->camera.position.z = 0;
     world->camera.projection = CAMERA_PERSPECTIVE;
     world->camera.target.x   = 0;
@@ -97,6 +99,66 @@ entity_id create_box(ecs_s& ecs, float cx, float cy, float cz, float w, float h,
 
     JPH::Shape*               shape = compound_settings.Create().Get();
     JPH::BodyCreationSettings body_creation(shape, JPH::RVec3 {cx, cy, cz}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::NON_MOVING);
+
+    body->interface = interface;
+    body->id        = interface->CreateAndAddBody(body_creation, JPH::EActivation::Activate);
+
+    mesh->mesh                     = GenMeshFromShape(shape, true);
+    mesh->material                 = R3D_GetDefaultMaterial();
+    mesh->material.emission.color  = BLUE;
+    mesh->material.emission.energy = 1.0;
+
+    (void)ecs.components.add<rotation_s>(entity);
+
+    return entity;
+}
+
+entity_id create_maze(ecs_s& ecs, unsigned short w, unsigned short h) {
+    const float thickness = 0.1;
+
+    auto [_, physics] = ecs.components.first<physics_s>();
+    auto interface    = physics->engine.Interface();
+
+    auto    entity = ecs.entities.create();
+    body_s* body   = ecs.components.add<body_s>(entity);
+    mesh_s* mesh   = ecs.components.add<mesh_s>(entity);
+    maze_s  maze   = maze_s(w, h, 999);
+
+    JPH::MutableCompoundShapeSettings compound_settings;
+
+    // Add floor
+    JPH::BoxShapeSettings* floor_shape = new JPH::BoxShapeSettings(JPH::RVec3 {(float)w / 2, thickness, (float)h / 2});
+    compound_settings.AddShape(JPH::RVec3 {0.0f, 0.0f, 0.0f}, JPH::Quat::sIdentity(), floor_shape);
+
+    // Add walls
+    for (const auto& edge : maze.edges) {
+        auto a = std::get<0>(edge);
+        auto b = std::get<1>(edge);
+
+        auto x_a = std::get<0>(a);
+        auto y_a = std::get<1>(a);
+        auto x_b = std::get<0>(b);
+        auto y_b = std::get<1>(b);
+
+        float wall_x = (float)std::max(x_a, x_b);
+        float wall_y = (float)std::max(y_a, y_b);
+        float wall_w = thickness;
+        float wall_l = thickness;
+        float wall_h = 0.1;
+
+        if (is_edge_horizontal(edge)) {
+            wall_w = 1.0;
+        } else {
+            wall_l = 1.0;
+        }
+
+        JPH::BoxShapeSettings* wall_shape = new JPH::BoxShapeSettings(JPH::RVec3 {wall_w / 2, wall_h, wall_l / 2});
+        compound_settings.AddShape(JPH::RVec3 {wall_x - (float)w / 2 + 0.5f, wall_h / 2 + thickness, wall_y - (float)h / 2 + 0.5f}, JPH::Quat::sIdentity(), wall_shape);
+    }
+
+    std::cout << "is valid: " << compound_settings.Create().IsValid() << std::endl;
+    JPH::Shape*               shape = compound_settings.Create().Get();
+    JPH::BodyCreationSettings body_creation(shape, JPH::RVec3 {0, 0, 0}, JPH::Quat::sIdentity(), JPH::EMotionType::Kinematic, Layers::NON_MOVING);
 
     body->interface = interface;
     body->id        = interface->CreateAndAddBody(body_creation, JPH::EActivation::Activate);

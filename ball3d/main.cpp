@@ -22,9 +22,13 @@ int main() {
 
     ecs_s ecs;
     (void)create_world(ecs);
-    (void)create_ball(ecs, 0.0, 3.0, 0.0, 1.0);
-    (void)create_box(ecs, 0.0, -1.0, 0.0, 5.0, 1.5, 10.0, 0.2);
-    (void)create_light(ecs, 0.0, 5.0, 0.0);
+    (void)create_ball(ecs, 0.0, 3.0, 0.0, 0.1);
+    //(void)create_box(ecs, 0.0, -1.0, 0.0, 5.0, 1.5, 10.0, 0.2);
+    create_maze(ecs, 8, 10);
+    (void)create_light(ecs, +5.0, 1.0, +5.0);
+    (void)create_light(ecs, +5.0, 1.0, -5.0);
+    (void)create_light(ecs, -5.0, 1.0, +5.0);
+    (void)create_light(ecs, -5.0, 1.0, -5.0);
 
     auto [_, physics] = ecs.components.first<physics_s>();
     physics->engine.Ready();
